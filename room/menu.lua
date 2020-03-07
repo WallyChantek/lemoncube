@@ -11,6 +11,3 @@ function menu:draw()
   love.graphics.setColor(1, 1, 1)
   love.graphics.print("Press start to play!", 100, 120)
 end
-
-function menu:keypressed(key, scancode, isrepeat)
-end

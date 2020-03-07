@@ -9,8 +9,8 @@ function Room:new(roomName)
   setmetatable(o, Room)
 
   roomName = roomName or "(untitled)"
-  assert(type(roomName) == TYPE_STRING,
-    "Argument \"roomName\" must be of type: "..TYPE_STRING)
+  assert(type(roomName) == Type.STRING,
+    "Argument \"roomName\" must be of type: "..Type.STRING)
 
   o._roomName = roomName
 
@@ -23,12 +23,12 @@ end
 function Room:updateCore()
   -- Update entities
   for k, v in pairs(self) do
-    if type(v) ~= TYPE_FUNCTION and v.isEntity then
+    if type(v) ~= Type.FUNCTION and v.isEntity then
       v:animate()
     end
   end
 
-  if type(self.update) ~= TYPE_NIL then self:update() end
+  if type(self.update) ~= Type.NIL then self:update() end
 end
 
 --[[
@@ -37,12 +37,12 @@ end
 function Room:drawCore()
   -- Draw entities
   for k, v in pairs(self) do
-    if type(v) ~= TYPE_FUNCTION and v.isEntity then
+    if type(v) ~= Type.FUNCTION and v.isEntity then
       v:draw(true, 8)
     end
   end
 
-  if type(self.draw) ~= TYPE_NIL then self:draw() end
+  if type(self.draw) ~= Type.NIL then self:draw() end
 end
 
 --[[
@@ -51,7 +51,7 @@ end
 function Room:leave()
   -- Clean up non-function datatypes
   for k, v in pairs(self) do
-    if type(v) ~= TYPE_FUNCTION then
+    if type(v) ~= Type.FUNCTION then
       v = nil
     end
   end

@@ -10,13 +10,13 @@ function level:load(prevRoom)
   self.player:addCollider("hitbox", {
     offsetX = -8,
     offsetY = -16,
-    relativity = RELATIVE_ORIGIN
+    relativity = Option.RELATIVE_ORIGIN
   })
   
   self.player:addAnimation("flash", self.imgPlayerFlash, 18, 34, {
     duration = 20,
     shouldLoop = true,
-    direction = ANIM_NORMAL,
+    direction = Option.ANIM_NORMAL,
     offsetX = -7,
     offsetY = -34,
     actionPoints = {
@@ -48,9 +48,6 @@ function level:update()
   if controllers[1]:wasReleased("fire1") then print("FIRE1 RELEASED!") end
   if controllers[1]:wasPressed("fire2") then print("FIRE2 PRESSED!") end
   if controllers[1]:wasReleased("fire2") then print("FIRE2 RELEASED!") end
-end
-
-function level:draw()
 end
 
 function level:keypressed(key, scancode, isrepeat)

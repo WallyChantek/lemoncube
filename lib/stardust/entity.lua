@@ -9,10 +9,10 @@ function Entity:new(x, y)
   setmetatable(o, Entity)
   
   -- Type checking
-  assert(type(x) == TYPE_NUMBER,
-    "Argument \"x\" must be of type: "..TYPE_NUMBER)
-  assert(type(y) == TYPE_NUMBER,
-    "Argument \"y\" must be of type: "..TYPE_NUMBER)
+  assert(type(x) == Type.NUMBER,
+    "Argument \"x\" must be of type: "..Type.NUMBER)
+  assert(type(y) == Type.NUMBER,
+    "Argument \"y\" must be of type: "..Type.NUMBER)
 
   -- Marker that this is indeed an entity
   o.isEntity = true
@@ -41,13 +41,13 @@ end
   Displays the entity's graphics.
 ]]--
 function Entity:draw(showColliders, originSize)
-  if type(showColliders) ~= TYPE_NIL then
-    assert(type(showColliders) == TYPE_BOOLEAN,
-      "Argument \"showColliders\" must be of type: "..TYPE_BOOLEAN)
+  if type(showColliders) ~= Type.NIL then
+    assert(type(showColliders) == Type.BOOLEAN,
+      "Argument \"showColliders\" must be of type: "..Type.BOOLEAN)
   end
   originSize = originSize or 0
-  assert(type(originSize) == TYPE_NUMBER,
-    "Argument \"originSize\" must be of type: "..TYPE_NUMBER)
+  assert(type(originSize) == Type.NUMBER,
+    "Argument \"originSize\" must be of type: "..Type.NUMBER)
   assert(originSize >= 0,
     "Argument \"originSize\" must be at least 0")
   
@@ -87,12 +87,12 @@ end
   Sets the color influence for the entity's graphics.
 ]]--
 function Entity:setColorTint(r, g, b)
-  assert(type(r) == TYPE_NUMBER,
-    "Argument \"r\" must be of type: "..TYPE_NUMBER)
-  assert(type(g) == TYPE_NUMBER,
-    "Argument \"g\" must be of type: "..TYPE_NUMBER)
-  assert(type(b) == TYPE_NUMBER,
-    "Argument \"b\" must be of type: "..TYPE_NUMBER)
+  assert(type(r) == Type.NUMBER,
+    "Argument \"r\" must be of type: "..Type.NUMBER)
+  assert(type(g) == Type.NUMBER,
+    "Argument \"g\" must be of type: "..Type.NUMBER)
+  assert(type(b) == Type.NUMBER,
+    "Argument \"b\" must be of type: "..Type.NUMBER)
   
   self._rgba.r = math.clamp(r, 0, 1)
   self._rgba.g = math.clamp(g, 0, 1)
@@ -103,8 +103,8 @@ end
   Sets the alpha/semi-transparency for the entity's graphics.
 ]]--
 function Entity:setTransparency(a)
-  assert(type(a) == TYPE_NUMBER,
-    "Argument \"a\" must be of type: "..TYPE_NUMBER)
+  assert(type(a) == Type.NUMBER,
+    "Argument \"a\" must be of type: "..Type.NUMBER)
   
   self._rgba.a = math.clamp(a, 0, 1)
 end
@@ -127,8 +127,8 @@ end
   Flips the entity's graphics horizontally.
 ]]--
 function Entity:flipHorizontally(isFlipped)
-  assert(type(isFlipped) == TYPE_BOOLEAN,
-    "Argument \"isFlipped\" must be of type: "..TYPE_BOOLEAN)
+  assert(type(isFlipped) == Type.BOOLEAN,
+    "Argument \"isFlipped\" must be of type: "..Type.BOOLEAN)
   
   if isFlipped then self._flipX = -1 else self._flipX = 1 end
   self:_updateColliders()
@@ -138,8 +138,8 @@ end
   Flips the entity's graphics vertically.
 ]]--
 function Entity:flipVertically(isFlipped)
-  assert(type(isFlipped) == TYPE_BOOLEAN,
-    "Argument \"isFlipped\" must be of type: "..TYPE_BOOLEAN)
+  assert(type(isFlipped) == Type.BOOLEAN,
+    "Argument \"isFlipped\" must be of type: "..Type.BOOLEAN)
   
   if isFlipped then self._flipY = -1 else self._flipY = 1 end
   self:_updateColliders()
@@ -159,7 +159,7 @@ end
   Adds an animation to the entity.
 ]]--
 function Entity:addAnimation(animId, image, width, height, options)
-  assert(type(animId) ~= TYPE_NIL,
+  assert(type(animId) ~= Type.NIL,
     "Argument \"animId\" must be defined")
   
   self._animations[animId] = Animation:new(image, width, height, options)
@@ -173,7 +173,7 @@ end
   Changes the current animation.
 ]]--
 function Entity:setAnimation(animId)
-  assert(type(animId) ~= TYPE_NIL,
+  assert(type(animId) ~= Type.NIL,
     "Argument \"animId\" must be defined")
   
   self._currentAnimation = animId
@@ -199,7 +199,7 @@ end
   Returns the X-coordinate position of the animation's current action point.
 ]]--
 function Entity:getActionPointX()
-  if type(self._animations[self._currentAnimation]) ~= TYPE_NIL then
+  if type(self._animations[self._currentAnimation]) ~= Type.NIL then
     return self._animations[self._currentAnimation]:getActionPointX()
   else
     return 0
@@ -210,7 +210,7 @@ end
   Returns the Y-coordinate position of the animation's current action point.
 ]]--
 function Entity:getActionPointY()
-  if type(self._animations[self._currentAnimation]) ~= TYPE_NIL then
+  if type(self._animations[self._currentAnimation]) ~= Type.NIL then
     return self._animations[self._currentAnimation]:getActionPointY()
   else
     return 0
@@ -225,10 +225,10 @@ end
 function Entity:addCollider(colliderId, options)
   -- Argument checking
   options = options or {}
-  assert(type(colliderId) ~= TYPE_NIL,
+  assert(type(colliderId) ~= Type.NIL,
     "Argument \"colliderId\" must be defined")
-  assert(type(options) == TYPE_TABLE,
-    "Argument \"options\" must be of type: "..TYPE_TABLE)
+  assert(type(options) == Type.TABLE,
+    "Argument \"options\" must be of type: "..Type.TABLE)
   for option, v in pairs(options) do
     if option ~= "width" and
       option ~= "height" and
@@ -247,18 +247,19 @@ function Entity:addCollider(colliderId, options)
   self._colliders[colliderId].height = options.height or 16
   self._colliders[colliderId].offsetX = options.offsetX or 0
   self._colliders[colliderId].offsetY = options.offsetY or 0
-  self._colliders[colliderId].relativity = options.relativity or RELATIVE_ORIGIN
+  self._colliders[colliderId].relativity = options.relativity or
+    Option.RELATIVE_ORIGIN
 
   -- Options checking
-  assert(type(self._colliders[colliderId].width) == TYPE_NUMBER,
-    "Option \"width\" must be of type: "..TYPE_NUMBER)
-  assert(type(self._colliders[colliderId].height) == TYPE_NUMBER,
-    "Option \"height\" must be of type: "..TYPE_NUMBER)
-  assert(type(self._colliders[colliderId].offsetX) == TYPE_NUMBER,
-    "Option \"offsetX\" must be of type: "..TYPE_NUMBER)
-  assert(type(self._colliders[colliderId].offsetY) == TYPE_NUMBER,
-    "Option \"offsetY\" must be of type: "..TYPE_NUMBER)
-  assert(type(self._colliders[colliderId].relativity) == TYPE_NUMBER,
+  assert(type(self._colliders[colliderId].width) == Type.NUMBER,
+    "Option \"width\" must be of type: "..Type.NUMBER)
+  assert(type(self._colliders[colliderId].height) == Type.NUMBER,
+    "Option \"height\" must be of type: "..Type.NUMBER)
+  assert(type(self._colliders[colliderId].offsetX) == Type.NUMBER,
+    "Option \"offsetX\" must be of type: "..Type.NUMBER)
+  assert(type(self._colliders[colliderId].offsetY) == Type.NUMBER,
+    "Option \"offsetY\" must be of type: "..Type.NUMBER)
+  assert(type(self._colliders[colliderId].relativity) == Type.NUMBER,
     "Option \"relativity\" must use a valid constant value")
 
   -- Options data checking
@@ -266,8 +267,8 @@ function Entity:addCollider(colliderId, options)
     "Option \"width\" must be at least 1")
   assert(self._colliders[colliderId].height > 0,
     "Option \"height\" must be at least 1")
-  assert(self._colliders[colliderId].relativity >= RELATIVE_ORIGIN and
-    self._colliders[colliderId].relativity <= RELATIVE_ACTION_POINT,
+  assert(self._colliders[colliderId].relativity >= Option.RELATIVE_ORIGIN and
+    self._colliders[colliderId].relativity <= Option.RELATIVE_ACTION_POINT,
     "Option \"relativity\" must use a valid constant value")
 
   self:_updateColliders()
@@ -277,7 +278,7 @@ end
   Removes an existing collider from the entity.
 ]]--
 function Entity:removeCollider(colliderId)
-  assert(type(colliderId) ~= TYPE_NIL,
+  assert(type(colliderId) ~= Type.NIL,
     "Argument \"colliderId\" must be defined")
   
   self._colliders[colliderId] = nil
@@ -288,10 +289,10 @@ end
 ]]--
 function Entity:_updateColliders()
   for k, collider in pairs(self._colliders) do
-    if collider.relativity == RELATIVE_ORIGIN then
+    if collider.relativity == Option.RELATIVE_ORIGIN then
       collider.x = self._x + collider.offsetX
       collider.y = self._y + collider.offsetY
-    elseif collider.relativity == RELATIVE_ACTION_POINT then
+    elseif collider.relativity == Option.RELATIVE_ACTION_POINT then
       collider.x = self._x + collider.offsetX + self:getActionPointX()
       collider.y = self._y + collider.offsetY + self:getActionPointY()
       print('hey')
@@ -320,8 +321,8 @@ end
   Sets the entity's X-axis position.
 ]]--
 function Entity:setX(x)
-  assert(type(x) == TYPE_NUMBER,
-    "Argument \"x\" must be of type: "..TYPE_NUMBER)
+  assert(type(x) == Type.NUMBER,
+    "Argument \"x\" must be of type: "..Type.NUMBER)
   
   self._x = x
   self:_updateColliders()
@@ -331,8 +332,8 @@ end
   Sets the entity's Y-axis position.
 ]]--
 function Entity:setY(y)
-  assert(type(y) == TYPE_NUMBER,
-    "Argument \"y\" must be of type: "..TYPE_NUMBER)
+  assert(type(y) == Type.NUMBER,
+    "Argument \"y\" must be of type: "..Type.NUMBER)
   
   self._y = y
   self:_updateColliders()
@@ -350,8 +351,8 @@ end
   Moves the entity's position horizontally by a specified amount.
 ]]--
 function Entity:moveX(pixels)
-  assert(type(pixels) == TYPE_NUMBER,
-    "Argument \"pixels\" must be of type: "..TYPE_NUMBER)
+  assert(type(pixels) == Type.NUMBER,
+    "Argument \"pixels\" must be of type: "..Type.NUMBER)
   
   self:setX(self._x + pixels)
 end
@@ -360,8 +361,8 @@ end
   Moves the entity's position vertically by a specified amount.
 ]]--
 function Entity:moveY(pixels)
-  assert(type(pixels) == TYPE_NUMBER,
-    "Argument \"pixels\" must be of type: "..TYPE_NUMBER)
+  assert(type(pixels) == Type.NUMBER,
+    "Argument \"pixels\" must be of type: "..Type.NUMBER)
   
   self:setY(self._y + pixels)
 end
@@ -407,8 +408,8 @@ end
   Sets the horizontal scale for the entity's graphics.
 ]]--
 function Entity:setHorizontalScale(scale)
-  assert(type(scale) == TYPE_NUMBER,
-    "Argument \"scale\" must be of type: "..TYPE_NUMBER)
+  assert(type(scale) == Type.NUMBER,
+    "Argument \"scale\" must be of type: "..Type.NUMBER)
   
   self._scaleX = math.max(scale, 0)
   self:_updateColliders()
@@ -418,8 +419,8 @@ end
   Sets the vertical scale for the entity's graphics.
 ]]--
 function Entity:setVerticalScale(scale)
-  assert(type(scale) == TYPE_NUMBER,
-    "Argument \"scale\" must be of type: "..TYPE_NUMBER)
+  assert(type(scale) == Type.NUMBER,
+    "Argument \"scale\" must be of type: "..Type.NUMBER)
   
   self._scaleY = math.max(scale, 0)
   self:_updateColliders()
@@ -437,8 +438,8 @@ end
   Scales the entity's graphics horizontally.
 ]]--
 function Entity:scaleHorizontally(scale)
-  assert(type(scale) == TYPE_NUMBER,
-    "Argument \"scale\" must be of type: "..TYPE_NUMBER)
+  assert(type(scale) == Type.NUMBER,
+    "Argument \"scale\" must be of type: "..Type.NUMBER)
   
   self:setHorizontalScale(self._scaleX + scale)
 end
@@ -447,8 +448,8 @@ end
   Scales the entity's graphics vertically.
 ]]--
 function Entity:scaleVertically(scale)
-  assert(type(scale) == TYPE_NUMBER,
-    "Argument \"scale\" must be of type: "..TYPE_NUMBER)
+  assert(type(scale) == Type.NUMBER,
+    "Argument \"scale\" must be of type: "..Type.NUMBER)
   
   self:setVerticalScale(self._scaleY + scale)
 end

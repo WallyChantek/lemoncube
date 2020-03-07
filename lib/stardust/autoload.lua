@@ -1,15 +1,21 @@
 local pkg = (...):match("(.-)[^%.]+$")
 
--- System ----------------------------------------------------------------------
-require(pkg .. "constants")
-require(pkg .. "debugger")
-require(pkg .. "errorHandler")
+-- Utility ---------------------------------------------------------------------
 require(pkg .. "helperFunctions")
+require(pkg .. "constants")
+
+
+-- Engine System Components ----------------------------------------------------
+require(pkg .. "errorHandler")
+require(pkg .. "debugger")
 
 
 -- Game Engine Core ------------------------------------------------------------
 require(pkg .. "engine")
+
+
+-- Engine Game Components ------------------------------------------------------
+require(pkg .. "inputController")
 require(pkg .. "room")
 require(pkg .. "animation")
 require(pkg .. "entity")
-require(pkg .. "inputController")

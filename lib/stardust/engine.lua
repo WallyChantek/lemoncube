@@ -5,11 +5,6 @@ Engine._scaleFactorY = 1
 
 Engine._inputControllers = {}
 Engine._debugger = nil
-Engine._supportedHandlers = {
-  "joystickhat",
-  "joystickaxis",
-  "keypressed", -- TODO: Remove when we build our own menu stuff
-}
 
 -- FPS limiter
 Engine._fpsMinDt = 1 / 60
@@ -18,10 +13,6 @@ Engine._fpsCurrentTime = Engine._fpsNextTime
 
 -- Room/gamestate management
 Engine._currentRoom = nil
-
--- Default Love configurations
-love.graphics.setLineStyle("rough")
-love.graphics.setDefaultFilter("nearest", "nearest")
 
 
 --[[
@@ -50,7 +41,7 @@ function Engine:draw()
   Engine:getRoom():drawCore()
 
   -- Draw debug overlay
-  if type(Engine._debugger) ~= TYPE_NIL then
+  if type(Engine._debugger) ~= Type.NIL then
     Engine._debugger:draw()
   end
 
@@ -67,13 +58,13 @@ end
   Fowards a Love event handler down to the currently-active room.
 ]]--
 function Engine:forwardEvent(event, data)
-  if type(Engine:getRoom()[event]) == TYPE_NIL then return end
+  if type(Engine:getRoom()[event]) == Type.NIL then return end
 
   data = data or {}
-  assert(type(event) == TYPE_STRING,
-    "Argument \"event\" must be of type: "..TYPE_STRING)
-  assert(type(data) == TYPE_TABLE,
-    "Argument \"data\" must be of type: "..TYPE_TABLE)
+  assert(type(event) == Type.STRING,
+    "Argument \"event\" must be of type: "..Type.STRING)
+  assert(type(data) == Type.TABLE,
+    "Argument \"data\" must be of type: "..Type.TABLE)
 
   Engine:getRoom()[event](Engine:getRoom(), unpack(data))
 end
@@ -104,12 +95,12 @@ end
   Changes the currently-active game state.
 ]]--
 function Engine:changeRoom(room)
-  assert(type(room) == TYPE_TABLE,
-    "Argument \"room\" must be of type: "..TYPE_TABLE)
+  assert(type(room) == Type.TABLE,
+    "Argument \"room\" must be of type: "..Type.TABLE)
 
   -- Clean up the room we're about to leave
   local prevRoom = nil
-  if type(Engine._currentRoom) ~= TYPE_NIL then
+  if type(Engine._currentRoom) ~= Type.NIL then
     Engine._currentRoom:leave()
     prevRoom = Engine._currentRoom
   end
@@ -119,7 +110,7 @@ function Engine:changeRoom(room)
 
   -- Switch to new room
   Engine._currentRoom = room
-  if type(Engine._currentRoom.load) ~= TYPE_NIL then
+  if type(Engine._currentRoom.load) ~= Type.NIL then
     Engine._currentRoom:load(prevRoom)
   end
 end

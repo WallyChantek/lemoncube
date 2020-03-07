@@ -1,11 +1,13 @@
 -- Stardust game framework
 require("lib.stardust.autoload")
 
--- Game states
-require("room.room_menu")
-require("room.room_level")
+-- Rooms
+require("room.menu")
+require("room.level")
 
 function love.load()
+  love.graphics.setLineStyle("rough")
+  love.graphics.setDefaultFilter("nearest", "nearest")
   Engine:setBaseResolution(320, 240)
   Engine:enableDebugMode()
 
@@ -26,25 +28,23 @@ function love.load()
 
   controllers = {}
   controllers[1] = InputController:new()
-  controllers[1]:setInput("up",    INPUT_KB, "w")
-  controllers[1]:setInput("down",  INPUT_KB, "s")
-  controllers[1]:setInput("left",  INPUT_KB, "a")
-  controllers[1]:setInput("right", INPUT_KB, "d")
-  controllers[1]:setInput("fire1", INPUT_KB, "j")
-  controllers[1]:setInput("fire2", INPUT_KB, "k")
-  controllers[1]:setInput("fire3", INPUT_KB, "u")
-  controllers[1]:setInput("fire4", INPUT_KB, "i")
+  controllers[1]:setInput("up",    Option.INPUT_KB, "w")
+  controllers[1]:setInput("down",  Option.INPUT_KB, "s")
+  controllers[1]:setInput("left",  Option.INPUT_KB, "a")
+  controllers[1]:setInput("right", Option.INPUT_KB, "d")
+  controllers[1]:setInput("fire1", Option.INPUT_KB, "j")
+  controllers[1]:setInput("fire2", Option.INPUT_KB, "k")
+  controllers[1]:setInput("fire3", Option.INPUT_KB, "u")
+  controllers[1]:setInput("fire4", Option.INPUT_KB, "i")
   
   Engine:changeRoom(menu)
 end
 
 function love.update(dt)
-  -- Update systems
   Engine:update()
 end
 
 function love.draw()
-  -- Draw systems
   Engine:draw()
 end
 

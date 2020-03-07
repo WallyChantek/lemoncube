@@ -26,7 +26,7 @@ function InputController:update()
     input.wasHeldLast = input.isHeldNow
     
     -- Check if input is active this frame
-    if input.inputType == INPUT_KB then
+    if input.inputType == Option.INPUT_KB then
       input.isHeldNow = love.keyboard.isDown(input.input)
     end
     -- TODO: Handle other inputs
@@ -41,14 +41,14 @@ end
   Adds a new input or changes an existing input.
 ]]--
 function InputController:setInput(inputId, inputType, input)
-  assert(type(inputId) ~= TYPE_NIL,
+  assert(type(inputId) ~= Type.NIL,
     "Argument \"inputId\" must be defined")
-  assert(type(inputType) == TYPE_NUMBER,
+  assert(type(inputType) == Type.NUMBER,
     "Argument \"inputType\" must use a valid constant value")
-  assert(inputType >= INPUT_KB and inputType <= INPUT_JOY_HAT,
+  assert(inputType >= Option.INPUT_KB and inputType <= Option.INPUT_JOY_HAT,
     "Argument \"inputType\" must use a valid constant value")
-  assert(type(input) == TYPE_STRING,
-    "Argument \"input\" must be of type: "..TYPE_STRING)
+  assert(type(input) == Type.STRING,
+    "Argument \"input\" must be of type: "..Type.STRING)
   
   self._inputs[inputId] = {
     inputType = inputType,
@@ -64,7 +64,7 @@ end
   Removes an existing input.
 ]]--
 function InputController:removeInput(inputId)
-  assert(type(inputId) ~= TYPE_NIL,
+  assert(type(inputId) ~= Type.NIL,
     "Argument \"inputId\" must be defined")
   
   self._inputs[inputId] = nil
@@ -74,13 +74,13 @@ end
   Returns whether the target input is currently down/active.
 ]]--
 function InputController:isBeingHeld(inputId)
-  assert(type(inputId) ~= TYPE_NIL,
+  assert(type(inputId) ~= Type.NIL,
     "Argument \"inputId\" must be defined")
   
   local input = self._inputs[inputId]
-  if (input.inputType == INPUT_KB) then
+  if (input.inputType == Option.INPUT_KB) then
     return love.keyboard.isDown(input.input)
-  elseif (input.inputType == INPUT_JOYBTN) then
+  elseif (input.inputType == Option.INPUT_JOYBTN) then
     -- Input was joystick
   else
     error("Uhh?")
@@ -91,7 +91,7 @@ end
   Returns whether the target input was pressed down during the current frame.
 ]]--
 function InputController:wasPressed(inputId)
-  assert(type(inputId) ~= TYPE_NIL,
+  assert(type(inputId) ~= Type.NIL,
     "Argument \"inputId\" must be defined")
   
   return self._inputs[inputId].wasPressed
@@ -101,7 +101,7 @@ end
   Returns whether the target input was released during the current frame.
 ]]--
 function InputController:wasReleased(inputId)
-  assert(type(inputId) ~= TYPE_NIL,
+  assert(type(inputId) ~= Type.NIL,
     "Argument \"inputId\" must be defined")
   
   return self._inputs[inputId].wasReleased

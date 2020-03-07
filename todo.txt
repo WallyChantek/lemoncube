@@ -1,14 +1,21 @@
 [ ] Revert animation's DT stuff (check file on desktop computer)
-[ ] Set up private Github repo
-[ ] Big-time clean up
-  [ ] Some things should only be accessible by system-level stuff, like Engine
-      accessing FpsLimiter...
-  [ ] Adjust autoload
+[/] Big-time clean up
+  [ ] engine
+  [ ] room
+  [ ] entity
+  [ ] animation
+  [ ] inputController
+  [ ] debugger
+  [x] autoload
+  [x] constants
+  [x] errorHandler
+  [x] helperFunctions
 [/] Engine
   [/] Base management
     [/] Entities
     [/] Input controllers
   [ ] Z-ordering/layering
+[ ] Test the hell out of everything
 
 [ ] Come up with a name for the framework already
 [ ] Look into canvases
@@ -54,13 +61,13 @@ Adds a new input or changes an existing input in a Joystick instance.
     - inputType
       - The device/mechanism this input is coming from.
       - Available values:
-        - INPUT_KB
+        - Option.INPUT_KB
           - Keyboard
-        - INPUT_JOY_BTN
+        - Option.INPUT_JOY_BTN
           - Buttons on a joystick/gamepad
-        - INPUT_JOY_AXIS
+        - Option.INPUT_JOY_AXIS
           - Analog stick or joystick mechanism
-        - INPUT_JOY_HAT
+        - Option.INPUT_JOY_HAT
           - Generally a d-pad type mechanism
     - inputName
       - An arbitrary, meaningful name to identify this input with.
