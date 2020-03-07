@@ -1,0 +1,70 @@
+[ ] Revert animation's DT stuff (check file on desktop computer)
+[ ] Set up private Github repo
+[ ] Big-time clean up
+  [ ] Some things should only be accessible by system-level stuff, like Engine
+      accessing FpsLimiter...
+  [ ] Adjust autoload
+[/] Engine
+  [/] Base management
+    [/] Entities
+    [/] Input controllers
+  [ ] Z-ordering/layering
+
+[ ] Come up with a name for the framework already
+[ ] Look into canvases
+[ ] Make it so you can push/pop gamestates without having to completely change?
+    Like for pause menus and stuff
+[ ] Fully-implement and test the hell out of colliders
+  [ ] Make colliders scale and whatnot
+
+[/] Fonts
+  [/] Better-looking error handler screen
+  [ ] Default bitmap font for framework
+[ ] Debugger
+  [ ] Add ability to add and monitor/watch data
+  - Clickteam-esque debugging system? Ability to add entity to inspector list,
+    remove, add automatically via code, etc.
+[/] Documentation
+  [x] Get basic design/build system in place
+  [ ] Index page
+  [ ] Write other pages
+  - Check EXT: tags
+[/] Controller/joystick/input object
+  [x] Base implementation
+  [ ] Handle joysticks properly
+  [ ] Functions for getting data from joystick axes/hats/etc.
+[/] Various TODO's
+[/] Animation
+  [x] Add animation functions
+  [ ] Test animation class
+  [ ] Entity/animation offsets
+[ ] Camera
+  [ ] Trailing mechanism
+  [ ] Parallaxing backgrounds
+[ ] Menu
+
+
+
+
+
+
+
+Adds a new input or changes an existing input in a Joystick instance.
+  Parameters:
+    - inputType
+      - The device/mechanism this input is coming from.
+      - Available values:
+        - INPUT_KB
+          - Keyboard
+        - INPUT_JOY_BTN
+          - Buttons on a joystick/gamepad
+        - INPUT_JOY_AXIS
+          - Analog stick or joystick mechanism
+        - INPUT_JOY_HAT
+          - Generally a d-pad type mechanism
+    - inputName
+      - An arbitrary, meaningful name to identify this input with.
+      - Example: "left", "right", "a", "b", "fire1", "fire2", etc.
+    - input
+      - The actual input code to type this input to. Please see Love's
+        documentation for information (TODO: Link to API pages)

@@ -1,0 +1,37 @@
+{
+  "class": "FPS Limiter",
+  "abstract": "The FPS Limiter class provides a means by which to cap the game's maximum framerate.",
+  "information": "The FPS Limiter is not mandatory to develop games with LemonCube. However, if you're like me and do not favor variable timesteps, you may find it preferable to use this class.",
+  "basicUsage": [
+    "ol",
+    "Create a new FpsLimiter object, providing your desired framerate (I cap it at 60 FPS for my games).",
+    "Call the prepare() function at the beginning of love.update().",
+    "Call the limitFps() function at the end of love.draw()."
+  ],
+  "methods": {
+    "new(number maxFps)": {
+      "description": "Constructor; creates a new FPS Limiter object.",
+      "parameters": {
+        "number maxFps": "The maximum framerate to limit the game to."
+      },
+      "returnType": "table",
+      "returnValue": "A new instance of the FPS Limiter class."
+    },
+    "prepare()": {
+      "description": "Stores information needed to properly limit the FPS.",
+      "information": "Call this at the beginning of love.update() before any other logic."
+    },
+    "limitFps()" : {
+      "description": "Handles the actual FPS-limiting mechanism by sleeping off extra frames.",
+      "information": "Call this at the end of love.draw() after all other draw calls."
+    },
+    "enable()" : {
+      "description": "Enables the FPS-limiting mechanism.",
+      "information": "You do not need to call this after instantiation. This is just to correspond with the disable() method in case you find a use for toggling this class in your game."
+    },
+    "disable()" : {
+      "description": "Disables the FPS-limiting mechanism.",
+      "information": "This is more of a convenience function for debugging, in case you need to temporarily disable the object for testing certain functionality."
+    }
+  }
+}

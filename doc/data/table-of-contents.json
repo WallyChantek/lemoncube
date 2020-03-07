@@ -1,0 +1,17 @@
+{
+  "System": [
+    "Constants",
+    "Helper Functions"
+  ],
+  "Debug": [
+    "Debugger"
+  ],
+  "Engine": [
+    "FPS Limiter"
+  ],
+  "Game Objects": [
+    "Animation",
+    "Entity",
+    "Input Controller"
+  ]
+}

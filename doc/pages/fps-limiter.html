@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentation</title>
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="favicon.png">
+<link rel="stylesheet" href="../res/style.css" />
+<link rel="stylesheet" href="../res/style-mobile.css" />
+</head>
+<body>
+<div class="top">
+<p>LemonCube Game Framework</p>
+</div>
+<div class="bottom">
+<div class="toc">
+<h1>Modules</h1>
+<ul><li>System
+<ul>
+<li><a href="constants">Constants</a></li>
+<li><a href="helper-functions">Helper Functions</a></li>
+</ul>
+<li>Debug
+<ul>
+<li><a href="debugger">Debugger</a></li>
+</ul>
+<li>Engine
+<ul>
+<li><a class="toc-current"href="fps-limiter">FPS Limiter</a></li>
+</ul>
+<li>Game Objects
+<ul>
+<li><a href="animation">Animation</a></li>
+<li><a href="entity">Entity</a></li>
+<li><a href="input-controller">Input Controller</a></li>
+</ul>
+</ul>
+</div>
+<div class="main">
+<h1>FPS Limiter</h1>
+<h2>Overview</h2>
+<h3>Abstract:</h3>
+<p>The FPS Limiter class provides a means by which to cap the game's maximum framerate.</p>
+<h3>Information:</h3>
+<p>The FPS Limiter is not mandatory to develop games with LemonCube. However, if you're like me and do not favor variable timesteps, you may find it preferable to use this class.</p>
+<h3>Basic Usage:</h3>
+<ol>
+<li>Create a new FpsLimiter object, providing your desired framerate (I cap it at 60 FPS for my games).</li>
+<li>Call the prepare() function at the beginning of love.update().</li>
+<li>Call the limitFps() function at the end of love.draw().</li>
+</ol>
+<br/>
+<h2>Method Summary</h2>
+<table>
+<tr>
+<th>Return Type</th>
+<th>Method and Description</th>
+</tr>
+<tr>
+<td>table</td>
+<td><a href="#new">new(number maxFps)</a><br/>Constructor; creates a new FPS Limiter object.</td>
+</tr><tr>
+<td>void</td>
+<td><a href="#prepare">prepare()</a><br/>Stores information needed to properly limit the FPS.</td>
+</tr><tr>
+<td>void</td>
+<td><a href="#limitfps">limitFps()</a><br/>Handles the actual FPS-limiting mechanism by sleeping off extra frames.</td>
+</tr><tr>
+<td>void</td>
+<td><a href="#enable">enable()</a><br/>Enables the FPS-limiting mechanism.</td>
+</tr><tr>
+<td>void</td>
+<td><a href="#disable">disable()</a><br/>Disables the FPS-limiting mechanism.</td>
+</tr>
+</table>
+<br/>
+<h2>Method Detail</h2>
+<h3 id="new">new</h3>
+<p class="code">new(number maxFps)</p>
+<p>Constructor; creates a new FPS Limiter object.</p>
+<table>
+<tr><th colspan="2">Parameters</th></tr>
+<tr>
+<td>number maxFps</td>
+<td>The maximum framerate to limit the game to.</td>
+</tr>
+</table>
+<table>
+<tr><th colspan="2">Returns</th></tr>
+<tr>
+<td>table</td>
+<td>A new instance of the FPS Limiter class.</td>
+</tr>
+</table>
+<br/>
+<h3 id="prepare">prepare</h3>
+<p class="code">prepare()</p>
+<p>Stores information needed to properly limit the FPS.</p>
+<p>Call this at the beginning of love.update() before any other logic.</p>
+<br/>
+<h3 id="limitfps">limitFps</h3>
+<p class="code">limitFps()</p>
+<p>Handles the actual FPS-limiting mechanism by sleeping off extra frames.</p>
+<p>Call this at the end of love.draw() after all other draw calls.</p>
+<br/>
+<h3 id="enable">enable</h3>
+<p class="code">enable()</p>
+<p>Enables the FPS-limiting mechanism.</p>
+<p>You do not need to call this after instantiation. This is just to correspond with the disable() method in case you find a use for toggling this class in your game.</p>
+<br/>
+<h3 id="disable">disable</h3>
+<p class="code">disable()</p>
+<p>Disables the FPS-limiting mechanism.</p>
+<p>This is more of a convenience function for debugging, in case you need to temporarily disable the object for testing certain functionality.</p>
+
+</div>
+</div>
+</body>
+</html>

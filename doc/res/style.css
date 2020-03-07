@@ -1,0 +1,152 @@
+* {
+    color: #404040;
+    font-family: Arial, Helvetica, Tahoma, sans-serif;
+    font-weight: normal;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+  height: 100%;
+  font-size: 12px;
+}
+
+h1 {
+  padding-bottom: 0.35rem;
+  border-bottom: 1px dashed gray;
+  font-size: 1.6rem;
+}
+
+h2 {
+  font-size: 1.3rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px dotted lightgray;
+}
+
+h3 {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+h1, h2, h3, p, ul, ol, table {
+  margin-bottom: 1rem;
+}
+
+ul, ol {
+  margin-left: 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+tr {
+  border-bottom: 1px solid lightgray;
+}
+
+tr:first-child {
+  background: gray;
+}
+
+tr:not(:first-child):nth-child(even) {
+  background: lightgray;
+}
+
+td, th {
+  vertical-align: top;
+  padding: 0.25rem 0.5rem;
+}
+
+th {
+  text-align: left;
+  font-weight: bold;
+}
+
+th:first-child, td:first-child {
+  width: 15%;
+}
+
+body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-content: stretch;
+}
+
+.top {
+  min-height: 40px;
+  max-height: 40px;
+  border-bottom: 1px solid black;
+  display: flex;
+  text-align: right;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+.top p {
+  margin-bottom: 0.5rem;
+  margin-right: 1.2rem;
+  font-style: italic;
+  cursor: default;
+}
+
+.bottom {
+  display: flex;
+  flex-grow: 1;
+}
+
+.toc, .main {
+  padding: 1.4rem 1.2rem;
+}
+
+.toc {
+  background: pink;
+  min-width: 10rem;
+  border-right: 1px solid black;
+}
+
+.toc ul {
+  margin-bottom: 0;
+}
+
+.toc li {
+  font-weight: normal;
+}
+
+.toc > ul > li {
+  font-weight: bold;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+.toc p {
+  font-style: italic;
+}
+
+.toc-current {
+  color: red;
+}
+
+.main {
+  flex-grow: 1;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.indent {
+  margin-left: 1rem;
+}
+
+.code {
+  white-space: pre;
+  font-family: Courier, Monaco, monospace;
+}
