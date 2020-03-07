@@ -9,7 +9,11 @@ function love.load()
   love.graphics.setLineStyle("rough")
   love.graphics.setDefaultFilter("nearest", "nearest")
   Engine:setBaseResolution(320, 240)
-  Engine:enableDebugMode()
+  Engine:enableDebugMode({
+    showOverlay = true,
+    showColliders = true,
+    originCrosshairRadius = 8
+  })
 
   path_res_img = "res/img/"
   res = {

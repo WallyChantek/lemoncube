@@ -81,9 +81,7 @@ function InputController:isBeingHeld(inputId)
   if (input.inputType == Option.INPUT_KB) then
     return love.keyboard.isDown(input.input)
   elseif (input.inputType == Option.INPUT_JOYBTN) then
-    -- Input was joystick
-  else
-    error("Uhh?")
+    -- TODO: Input was joystick
   end
 end
 

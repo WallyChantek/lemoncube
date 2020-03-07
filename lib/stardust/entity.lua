@@ -8,13 +8,13 @@ function Entity:new(x, y)
   local o = {}
   setmetatable(o, Entity)
   
-  -- Type checking
+  -- Check arguments
   assert(type(x) == Type.NUMBER,
     "Argument \"x\" must be of type: "..Type.NUMBER)
   assert(type(y) == Type.NUMBER,
     "Argument \"y\" must be of type: "..Type.NUMBER)
 
-  -- Marker that this is indeed an entity
+  -- Marker indicating this is an entity (used in room cleanup)
   o.isEntity = true
 
   -- Object's position
@@ -40,17 +40,7 @@ end
 --[[
   Displays the entity's graphics.
 ]]--
-function Entity:draw(showColliders, originSize)
-  if type(showColliders) ~= Type.NIL then
-    assert(type(showColliders) == Type.BOOLEAN,
-      "Argument \"showColliders\" must be of type: "..Type.BOOLEAN)
-  end
-  originSize = originSize or 0
-  assert(type(originSize) == Type.NUMBER,
-    "Argument \"originSize\" must be of type: "..Type.NUMBER)
-  assert(originSize >= 0,
-    "Argument \"originSize\" must be at least 0")
-  
+function Entity:draw(originSize)
   -- Draw current graphic
   love.graphics.setColor(self._rgba.r, self._rgba.g, self._rgba.b, self._rgba.a)
   self._animations[self._currentAnimation]:draw(self._x, self._y,
@@ -58,7 +48,7 @@ function Entity:draw(showColliders, originSize)
     self._flipY * self._scaleY)
   
   -- Draw collider(s)
-  if (showColliders) then
+  if (Engine.debugOptions.showColliders) then
     love.graphics.setColor(1, 0, 0, 0.5)
     for k, collider in pairs(self._colliders) do
       love.graphics.rectangle("fill", collider.x, collider.y, collider.width,
@@ -67,12 +57,15 @@ function Entity:draw(showColliders, originSize)
   end
 
   -- Draw origin point
-  if originSize > 0 then
-    local orgOut = originSize + (originSize / 2)
-    local orgIn = orgOut - originSize
+  if Engine.debugOptions.originCrosshairRadius > 0 then
+    local orgOut = Engine.debugOptions.originCrosshairRadius +
+      (Engine.debugOptions.originCrosshairRadius / 2)
+    local orgIn = orgOut - Engine.debugOptions.originCrosshairRadius
     love.graphics.setColor(0, 1, 0, 1)
     love.graphics.points(self._x, self._y)
-    love.graphics.ellipse("line", self._x, self._y, originSize, originSize)
+    love.graphics.ellipse("line", self._x, self._y,
+      Engine.debugOptions.originCrosshairRadius,
+      Engine.debugOptions.originCrosshairRadius)
     love.graphics.line(self._x - orgIn, self._y, self._x - orgOut, self._y)
     love.graphics.line(self._x + orgIn, self._y, self._x + orgOut, self._y)
     love.graphics.line(self._x, self._y - orgIn, self._x, self._y - orgOut)
@@ -82,7 +75,6 @@ end
 
 
 -- Graphics --------------------------------------------------------------------
-
 --[[
   Sets the color influence for the entity's graphics.
 ]]--
@@ -223,7 +215,6 @@ end
   Adds a new collider to the entity.
 ]]--
 function Entity:addCollider(colliderId, options)
-  -- Argument checking
   options = options or {}
   assert(type(colliderId) ~= Type.NIL,
     "Argument \"colliderId\" must be defined")
@@ -239,7 +230,6 @@ function Entity:addCollider(colliderId, options)
     end
   end
 
-  -- Configuration
   self._colliders[colliderId] = {}
   self._colliders[colliderId].x = self._x
   self._colliders[colliderId].y = self._y
@@ -250,7 +240,6 @@ function Entity:addCollider(colliderId, options)
   self._colliders[colliderId].relativity = options.relativity or
     Option.RELATIVE_ORIGIN
 
-  -- Options checking
   assert(type(self._colliders[colliderId].width) == Type.NUMBER,
     "Option \"width\" must be of type: "..Type.NUMBER)
   assert(type(self._colliders[colliderId].height) == Type.NUMBER,
@@ -262,7 +251,6 @@ function Entity:addCollider(colliderId, options)
   assert(type(self._colliders[colliderId].relativity) == Type.NUMBER,
     "Option \"relativity\" must use a valid constant value")
 
-  -- Options data checking
   assert(self._colliders[colliderId].width > 0,
     "Option \"width\" must be at least 1")
   assert(self._colliders[colliderId].height > 0,
@@ -295,11 +283,9 @@ function Entity:_updateColliders()
     elseif collider.relativity == Option.RELATIVE_ACTION_POINT then
       collider.x = self._x + collider.offsetX + self:getActionPointX()
       collider.y = self._y + collider.offsetY + self:getActionPointY()
-      print('hey')
     end
   end
 end
-
 
 
 -- Transformations -------------------------------------------------------------

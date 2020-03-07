@@ -1,11 +1,11 @@
 [ ] Revert animation's DT stuff (check file on desktop computer)
 [/] Big-time clean up
-  [ ] engine
-  [ ] room
-  [ ] entity
+  [x] engine
+  [x] room
+  [x] entity
   [ ] animation
-  [ ] inputController
-  [ ] debugger
+  [x] inputController
+  [x] debugger
   [x] autoload
   [x] constants
   [x] errorHandler

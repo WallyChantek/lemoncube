@@ -20,7 +20,7 @@ end
 --[[
   Updates the core back-end functionality of the room.
 ]]--
-function Room:updateCore()
+function Room:updateRoom()
   -- Update entities
   for k, v in pairs(self) do
     if type(v) ~= Type.FUNCTION and v.isEntity then
@@ -28,20 +28,22 @@ function Room:updateCore()
     end
   end
 
+  -- Call room-specific update function
   if type(self.update) ~= Type.NIL then self:update() end
 end
 
 --[[
   Draws the entities in the room.
 ]]--
-function Room:drawCore()
+function Room:drawRoom()
   -- Draw entities
   for k, v in pairs(self) do
     if type(v) ~= Type.FUNCTION and v.isEntity then
-      v:draw(true, 8)
+      v:draw()
     end
   end
 
+  -- Call room-specific draw function
   if type(self.draw) ~= Type.NIL then self:draw() end
 end
 
@@ -55,8 +57,6 @@ function Room:leave()
       v = nil
     end
   end
-
-  -- TODO: Clean up shit better? Do I need to recurse through tables?
 end
 
 --[[

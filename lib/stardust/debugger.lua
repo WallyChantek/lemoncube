@@ -15,9 +15,11 @@ end
   Displays the debugger information.
 ]]--
 function Debugger:draw()
+  if not Engine.debugOptions.showOverlay then return end
+
   -- Display which gamestate is active
   love.graphics.setColor(1, 1, 1)
-  love.graphics.print("State: " .. Engine:getRoom():getName(), 4,
+  love.graphics.print("State: " .. Engine:getCurrentRoomName(), 4,
     love.graphics.getHeight() - 16)
   
   -- Display FPS

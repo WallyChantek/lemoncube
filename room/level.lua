@@ -32,6 +32,7 @@ function level:load(prevRoom)
 end
 
 function level:update()
+  self.player:rotate(0.2)
   if controllers[1]:isBeingHeld("up") then
     self.player:moveY(-3)
   elseif controllers[1]:isBeingHeld("down") then
