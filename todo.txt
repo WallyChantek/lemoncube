@@ -1,8 +1,21 @@
-[ ] Make IDs only accept numbers or strings (animations, colliders, inputs, etc.)
-[ ] Test the hell out of everything and fix stuff
+-- Current To-do List ----------------------------------------------------------
+-- High priority
+[x] Make IDs only accept numbers or strings (animations, colliders, inputs, etc)
+[/] Test the hell out of everything and fix stuff
   [ ] Animation
-  [ ] Entity
+  [/] Entity
+    [x] Collider transformations
+    [x] Colliders properly aligning with rotated action points
+    [x] Circular colliders
+    [ ] Multiple action points
+      - Make it so you have to specify all action points for all animations
+    [ ] Clean up / clarify animation functions (pause/play/etc)
+[ ] Engine
+  [ ] Collisions
+[ ] Review TODOs
+[ ] Reconsider names/collections of various constants
 
+-- Normal priority
 [ ] Z-ordering/layering of entities
 [ ] Come up with a name for the framework already
 [ ] Look into canvases
@@ -11,6 +24,7 @@
 [ ] Fully-implement and test the hell out of colliders
   [ ] Make colliders scale and whatnot
 
+-- Low priority
 [/] Fonts
   [/] Better-looking error handler screen
   [ ] Default bitmap font for framework
@@ -39,10 +53,22 @@
 
 
 
+-- Long-term Goals -------------------------------------------------------------
+- SAT (simple-axis theorem) collision, support for rotated rectangles and
+  circular colliders
+- Animation timeline application
+  - Opens spritesheet, separates into frames based on specified width/height
+    (basically like how quads are generated)
+  - Allows you to set up data
+    - Origin point
+    - List of action points
+    - Animation speed
+  - Saves data as JSON or whatever, LemonCube automatically searches in
+    directory for JSON file when loading image data
+  - When re-opening image, also automatically tried to load data if present
 
 
-
-
+-- Temp Stuff ------------------------------------------------------------------
 Adds a new input or changes an existing input in a Joystick instance.
   Parameters:
     - inputType

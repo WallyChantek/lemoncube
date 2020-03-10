@@ -14,8 +14,10 @@ Type.TABLE = "table"
 
 -- Entity ----------------------------------------------------------------------
 -- Collider
-Option.RELATIVE_ORIGIN = 0
+Option.RELATIVE_ORIGIN_POINT = 0
 Option.RELATIVE_ACTION_POINT = 1
+Option.RECTANGLE = 0
+Option.CIRCLE = 1
 
 
 -- Animation -------------------------------------------------------------------

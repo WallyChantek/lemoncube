@@ -52,8 +52,13 @@ function Entity:draw(originSize)
     love.graphics.setColor(1, 0, 0, 0.5)
     for k, collider in pairs(self._colliders) do
       self:_updateColliders()
-      love.graphics.rectangle("fill", collider.x, collider.y,
-        collider.width, collider.height)
+      if collider.shape == Option.RECTANGLE then
+        love.graphics.rectangle("fill", collider.x, collider.y,
+          collider.width, collider.height)
+      else
+        love.graphics.ellipse("fill", collider.x, collider.y,
+          collider.width / 2, collider.height / 2)
+      end
     end
   end
 
@@ -156,25 +161,25 @@ end
 --[[
   Adds an animation to the entity.
 ]]--
-function Entity:addAnimation(animId, image, width, height, options)
-  assert(type(animId) ~= Type.NIL,
-    "Argument \"animId\" must be defined")
+function Entity:addAnimation(animationId, image, width, height, options)
+  assert(type(animationId) == Type.STRING,
+    "Argument \"animationId\" must be of type: "..Type.STRING)
   
-  self._animations[animId] = Animation:new(image, width, height, options)
+  self._animations[animationId] = Animation:new(image, width, height, options)
   
   if self._currentAnimation == "" then
-    self._currentAnimation = animId
+    self._currentAnimation = animationId
   end
 end
 
 --[[
   Changes the current animation.
 ]]--
-function Entity:setAnimation(animId)
-  assert(type(animId) ~= Type.NIL,
-    "Argument \"animId\" must be defined")
+function Entity:changeAnimation(animationId)
+  assert(type(animationId) == Type.STRING,
+    "Argument \"animationId\" must be of type: "..Type.STRING)
   
-  self._currentAnimation = animId
+  self._currentAnimation = animationId
   self._animations[self._currentAnimation]:reset()
 end
 
@@ -190,6 +195,13 @@ end
 ]]--
 function Entity:resumeAnimation()
   self._animations[self._currentAnimation]:resume()
+end
+
+--[[
+  Gets the current animation's ID.
+]]--
+function Entity:getCurrentAnimationId()
+  return self._currentAnimation
 end
 
 --[[
@@ -223,14 +235,15 @@ function Entity:addCollider(colliderId, options)
   
   -- Check arguments
   options = options or {}
-  assert(type(colliderId) ~= Type.NIL,
-    "Argument \"colliderId\" must be defined")
+  assert(type(colliderId) == Type.STRING,
+    "Argument \"colliderId\" must be of type: "..Type.STRING)
   assert(type(options) == Type.TABLE,
     "Argument \"options\" must be of type: "..Type.TABLE)
   
   -- Validate option names
   for option, v in pairs(options) do
-    if option ~= "width" and
+    if option ~= "shape" and
+      option ~= "width" and
       option ~= "height" and
       option ~= "offsetX" and
       option ~= "offsetY" and
@@ -243,6 +256,7 @@ function Entity:addCollider(colliderId, options)
   self._colliders[colliderId] = {}
   self._colliders[colliderId].x = self._x
   self._colliders[colliderId].y = self._y
+  self._colliders[colliderId].shape = options.shape or Option.RECTANGLE
   self._colliders[colliderId].width = options.width or 16
   self._colliders[colliderId].height = options.height or 16
   self._colliders[colliderId].baseWidth = self._colliders[colliderId].width
@@ -250,9 +264,11 @@ function Entity:addCollider(colliderId, options)
   self._colliders[colliderId].offsetX = options.offsetX or 0
   self._colliders[colliderId].offsetY = options.offsetY or 0
   self._colliders[colliderId].relativity = options.relativity or
-    Option.RELATIVE_ORIGIN
+    Option.RELATIVE_ORIGIN_POINT
   
   -- Check option types
+  assert(type(self._colliders[colliderId].shape) == Type.NUMBER,
+    "Option \"shape\" must use a valid constant value")
   assert(type(self._colliders[colliderId].width) == Type.NUMBER,
     "Option \"width\" must be of type: "..Type.NUMBER)
   assert(type(self._colliders[colliderId].height) == Type.NUMBER,
@@ -265,12 +281,15 @@ function Entity:addCollider(colliderId, options)
     "Option \"relativity\" must use a valid constant value")
 
   -- Check option values
-  assert(self._colliders[colliderId].width > 0,
+  assert(self._colliders[colliderId].shape >= Option.RECTANGLE
+    and self._colliders[colliderId].shape <= Option.CIRCLE,
+    "Option \"shape\" must use a valid constant value")
+  assert(self._colliders[colliderId].width >= 1,
     "Option \"width\" must be at least 1")
-  assert(self._colliders[colliderId].height > 0,
+  assert(self._colliders[colliderId].height >= 1,
     "Option \"height\" must be at least 1")
-  assert(self._colliders[colliderId].relativity >= Option.RELATIVE_ORIGIN and
-    self._colliders[colliderId].relativity <= Option.RELATIVE_ACTION_POINT,
+  assert(self._colliders[colliderId].relativity >= Option.RELATIVE_ORIGIN_POINT
+    and self._colliders[colliderId].relativity <= Option.RELATIVE_ACTION_POINT,
     "Option \"relativity\" must use a valid constant value")
 end
 
@@ -278,8 +297,8 @@ end
   Retrieves a collider by its ID.
 ]]--
 function Entity:getCollider(colliderId)
-  assert(type(colliderId) ~= Type.NIL,
-    "Argument \"colliderId\" must be defined")
+  assert(type(colliderId) == Type.STRING,
+    "Argument \"colliderId\" must be of type: "..Type.STRING)
   
   self:_updateColliders()
   
@@ -290,8 +309,8 @@ end
   Removes an existing collider from the entity.
 ]]--
 function Entity:removeCollider(colliderId)
-  assert(type(colliderId) ~= Type.NIL,
-    "Argument \"colliderId\" must be defined")
+  assert(type(colliderId) == Type.STRING,
+    "Argument \"colliderId\" must be of type: "..Type.STRING)
   
   self._colliders[colliderId] = nil
 end
@@ -301,20 +320,48 @@ end
 ]]--
 function Entity:_updateColliders()
   for k, collider in pairs(self._colliders) do
-    collider.width = collider.baseWidth * self._scaleX
-    collider.height = collider.baseHeight * self._scaleY
+    -- Recalculate object's size relative to entity's scale
+    local r = math.rad(self._rotation)
+    local scaleX = self._scaleX -
+      ((self._scaleX - self._scaleY) * math.abs(math.sin(r)))
+    local scaleY = self._scaleY -
+      ((self._scaleY - self._scaleX) * math.abs(math.sin(r)))
+    collider.width = collider.baseWidth * scaleX
+    collider.height = collider.baseHeight * scaleY
     
-    if collider.relativity == Option.RELATIVE_ORIGIN then
-      collider.x = self._x + (collider.offsetX * self._scaleX * self._flipX)
-      collider.y = self._y + (collider.offsetY * self._scaleY * self._flipY)
-      if self._flipX == -1 then collider.x = collider.x - collider.width end
-      if self._flipY == -1 then collider.y = collider.y - collider.height end
-    elseif collider.relativity == Option.RELATIVE_ACTION_POINT then
-      collider.x = self._x +
-        ((collider.offsetX + self:getActionPointX()) * self._scaleX)
-      collider.y = self._y +
-        ((collider.offsetY + self:getActionPointY()) * self._scaleY)
+    -- Offset for positioning the collider relatively
+    local offsetX = collider.offsetX
+    local offsetY = collider.offsetY
+    if collider.relativity == Option.RELATIVE_ACTION_POINT then
+      offsetX = offsetX + self:getActionPointX()
+      offsetY = offsetY + self:getActionPointY()
     end
+    
+    -- Reposition offset to rectangle's actual midpoint (gets undone later)
+    if collider.shape == Option.RECTANGLE then
+      offsetX = offsetX + (collider.baseWidth / 2.0)
+      offsetY = offsetY + (collider.baseHeight / 2.0)
+    end
+    
+    -- Apply scaling/flipping transformations
+    offsetX = offsetX * self._scaleX * self._flipX
+    offsetY = offsetY * self._scaleY * self._flipY
+    
+    -- Apply rotation transformation
+      local rotX = offsetX * math.cos(r) - offsetY * math.sin(r)
+      local rotY = offsetX * math.sin(r) + offsetY * math.cos(r)
+      offsetX = rotX
+      offsetY = rotY
+    
+    -- Undo the midpoint repositioning from earlier
+    if collider.shape == Option.RECTANGLE then
+      offsetX = offsetX - (collider.width / 2.0)
+      offsetY = offsetY - (collider.height / 2.0)
+    end
+    
+    -- Set position to entity's position plus the calculated offset
+    collider.x = self._x + offsetX
+    collider.y = self._y + offsetY
   end
 end
 

@@ -8,9 +8,22 @@ function level:load(prevRoom)
   -- Initialize objects.
   self.player = Entity:new(128, 128, "default", "player")
   self.player:addCollider("hitbox", {
-    offsetX = -8,
-    offsetY = -16,
-    relativity = Option.RELATIVE_ORIGIN
+    shape = Option.CIRCLE,
+    width = 16, height = 16,
+    offsetX = 0, offsetY = -16,
+    relativity = Option.RELATIVE_ORIGIN_POINT
+  })
+  self.player:addCollider("hurtbox1", {
+    shape = Option.RECTANGLE,
+    width = 8, height = 8,
+    offsetX = -4, offsetY = -4,
+    relativity = Option.RELATIVE_ACTION_POINT
+  })
+  self.player:addCollider("hurtbox2", {
+    shape = Option.CIRCLE,
+    width = 8, height = 8,
+    offsetX = 0, offsetY = -17,
+    relativity = Option.RELATIVE_ACTION_POINT
   })
   
   self.player:addAnimation("flash", self.imgPlayerFlash, 18, 34, {
@@ -20,15 +33,15 @@ function level:load(prevRoom)
     offsetX = -7,
     offsetY = -34,
     actionPoints = {
-      { x = 00, y = 01 },
-      { x = 02, y = 03 },
-      { x = 04, y = 05 },
-      { x = 06, y = 07 },
-      { x = 08, y = 09 }
+      { x = 0, y = -28 },
+      { x = 0, y = -28 },
+      { x = 0, y = -28 },
+      { x = 0, y = -28 },
+      { x = 0, y = -28 }
     }
   })
   -- player:addAnimation("idle", imgPlayer, 18, 34)
-  -- self.player:scale(3, 3)
+  self.player:setScale(2, 2)
 end
 
 function level:update()
