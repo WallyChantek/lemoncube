@@ -301,18 +301,20 @@ end
 ]]--
 function Entity:_updateColliders()
   for k, collider in pairs(self._colliders) do
+    collider.width = collider.baseWidth * self._scaleX
+    collider.height = collider.baseHeight * self._scaleY
+    
     if collider.relativity == Option.RELATIVE_ORIGIN then
-      collider.x = self._x + (collider.offsetX * self._scaleX)
-      collider.y = self._y + (collider.offsetY * self._scaleY)
+      collider.x = self._x + (collider.offsetX * self._scaleX * self._flipX)
+      collider.y = self._y + (collider.offsetY * self._scaleY * self._flipY)
+      if self._flipX == -1 then collider.x = collider.x - collider.width end
+      if self._flipY == -1 then collider.y = collider.y - collider.height end
     elseif collider.relativity == Option.RELATIVE_ACTION_POINT then
       collider.x = self._x +
         ((collider.offsetX + self:getActionPointX()) * self._scaleX)
       collider.y = self._y +
         ((collider.offsetY + self:getActionPointY()) * self._scaleY)
     end
-    
-    collider.width = collider.baseWidth * self._scaleX
-    collider.height = collider.baseHeight * self._scaleY
   end
 end
 

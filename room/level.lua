@@ -28,7 +28,7 @@ function level:load(prevRoom)
     }
   })
   -- player:addAnimation("idle", imgPlayer, 18, 34)
-  self.player:scale(3, 3)
+  -- self.player:scale(3, 3)
 end
 
 function level:update()
