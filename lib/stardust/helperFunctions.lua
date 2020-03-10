@@ -45,6 +45,26 @@ function util.reverseTable(t)
   end
 end
 
+--[[
+  Returns a numeric value based on a boolean value (1 or 0).
+]]--
+function util.booleanToNumber(b)
+  assert(type(b) == Type.BOOLEAN,
+    "Argument \"b\" must be of type: "..Type.BOOLEAN)
+  
+  return b and 1 or 0
+end
+
+--[[
+  Returns a boolean value based on a numeric value.
+]]--
+function util.numberToBoolean(n)
+  assert(type(n) == Type.NUMBER,
+    "Argument \"n\" must be of type: "..Type.NUMBER)
+  
+  return n > 0 and true or false
+end
+
 
 -- Math Extensions -------------------------------------------------------------
 --[[

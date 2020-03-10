@@ -1,7 +1,7 @@
 {
   "class": "FPS Limiter",
   "abstract": "The FPS Limiter class provides a means by which to cap the game's maximum framerate.",
-  "information": "The FPS Limiter is not mandatory to develop games with LemonCube. However, if you're like me and do not favor variable timesteps, you may find it preferable to use this class.",
+  "information": "The FPS Limiter is mandatory to develop games with LemonCube. I have no desire to argue whether frame-dependent, fixed, or variable timesteps are superior for games. I just really don't care. I grew up playing arcade games (especially shooting games like Gradius) that slowed down when processing became too intensive. This is simply what I prefer, so I designed this framework around that notion. If this does not work for you, then you should not use this framework.",
   "basicUsage": [
     "ol",
     "Create a new FpsLimiter object, providing your desired framerate (I cap it at 60 FPS for my games).",

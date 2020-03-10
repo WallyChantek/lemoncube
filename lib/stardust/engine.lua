@@ -79,10 +79,12 @@ end
   Enables various debugging overlay elements.
 ]]--
 function Engine:enableDebugMode(options)
+  -- Check arguments
   options = options or {}
   assert(type(options) == Type.TABLE,
     "Argument \"options\" must be of type: "..Type.TABLE)
 
+  -- Validate option names
   for option, v in pairs(options) do
     if option ~= "showOverlay" and
       option ~= "showColliders" and
@@ -91,20 +93,24 @@ function Engine:enableDebugMode(options)
     end
   end
 
+  -- Set option defaults
   options.showOverlay = options.showOverlay or false
   options.showColliders = options.showColliders or false
   options.originCrosshairRadius = options.originCrosshairRadius or 0
 
-  assert(options.originCrosshairRadius >= 0,
-    "Argument \"originCrosshairRadius\" must be at least 0")
-
+  -- Check option types
   assert(type(options.showOverlay) == Type.BOOLEAN,
     "Option \"showOverlay\" must be of type: "..Type.BOOLEAN)
   assert(type(options.showColliders) == Type.BOOLEAN,
     "Option \"showColliders\" must be of type: "..Type.BOOLEAN)
   assert(type(options.originCrosshairRadius) == Type.NUMBER,
     "Option \"originCrosshairRadius\" must be of type: "..Type.NUMBER)
+  
+  -- Check option values
+  assert(options.originCrosshairRadius >= 0,
+    "Argument \"originCrosshairRadius\" must be at least 0")
 
+  -- Create debugger object & save option settings
   Engine._debugger = Debugger:new()
   Engine.debugOptions = options
 end

@@ -6,7 +6,7 @@ function level:load(prevRoom)
   self.imgPlayerFlash = love.graphics.newImage(res.sprite.girlFlash)
   
   -- Initialize objects.
-  self.player = Entity:new(128, 196, "default", "player")
+  self.player = Entity:new(128, 128, "default", "player")
   self.player:addCollider("hitbox", {
     offsetX = -8,
     offsetY = -16,
@@ -32,7 +32,6 @@ function level:load(prevRoom)
 end
 
 function level:update()
-  self.player:rotate(0.2)
   if controllers[1]:isBeingHeld("up") then
     self.player:moveY(-3)
   elseif controllers[1]:isBeingHeld("down") then
@@ -45,10 +44,12 @@ function level:update()
     self.player:moveX(3)
   end
 
-  if controllers[1]:wasPressed("fire1") then print("FIRE1 PRESSED!") end
-  if controllers[1]:wasReleased("fire1") then print("FIRE1 RELEASED!") end
-  if controllers[1]:wasPressed("fire2") then print("FIRE2 PRESSED!") end
-  if controllers[1]:wasReleased("fire2") then print("FIRE2 RELEASED!") end
+  if controllers[1]:wasPressed("fire3") then self.player:flipHorizontally() end
+  if controllers[1]:wasPressed("fire5") then self.player:flipVertically() end
+  if controllers[1]:isBeingHeld("fire1") then self.player:rotate(-1) end
+  if controllers[1]:isBeingHeld("fire6") then self.player:rotate(1) end
+  if controllers[1]:isBeingHeld("fire4") then self.player:scale(0.1, 0.1) end
+  if controllers[1]:isBeingHeld("fire2") then self.player:scale(-0.1, -0.1) end
 end
 
 function level:keypressed(key, scancode, isrepeat)

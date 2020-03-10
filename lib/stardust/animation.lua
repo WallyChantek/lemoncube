@@ -8,18 +8,18 @@ function Animation:new(image, width, height, options)
   local o = {}
   setmetatable(o, Animation)
 
-  -- Argument checking
+  -- Check arguments
+  options = options or {}
   assert(type(image) == Type.USERDATA,
     "Argument \"image\" must be of type: "..Type.USERDATA)
   assert(type(width) == Type.NUMBER,
     "Argument \"width\" must be of type: "..Type.NUMBER)
   assert(type(height) == Type.NUMBER,
     "Argument \"height\" must be of type: "..Type.NUMBER)
-  
-  -- Options validation checking
-  options = options or {}
   assert(type(options) == Type.TABLE,
     "Argument \"options\" must be of type: "..Type.TABLE)
+  
+  -- Validate option names
   for option, v in pairs(options) do
     if option ~= "duration" and
       option ~= "shouldLoop" and
@@ -33,7 +33,7 @@ function Animation:new(image, width, height, options)
     end
   end
   
-  -- Configuration
+  -- Set option defaults
   o._duration = options.duration or 10
   o._shouldLoop = options.shouldLoop or false
   o._cycles = options.cycles or 1
@@ -46,7 +46,7 @@ function Animation:new(image, width, height, options)
   o._offsetY = options.offsetY or 0
   o._actionPoints = options.actionPoints or {}
   
-  -- Options checking
+  -- Check option types
   local direction = options.direction or 0
   assert(type(o._duration) == Type.NUMBER,
     "Option \"duration\" must be of type: "..Type.NUMBER)
@@ -65,22 +65,22 @@ function Animation:new(image, width, height, options)
   assert(type(o._actionPoints) == Type.TABLE,
     "Option \"actionPoints\" must be of type: "..Type.TABLE)
   
-  -- Data checking
+  -- Check option data
   assert(width > 0,
     "Argument \"width\" must be at least 1")
   assert(height > 0,
     "Argument \"height\" must be at least 1")
   assert(o._duration > 0,
     "Option \"_duration\" must be at least 1")
-  assert(o._cycles >= 1,
+  assert(o._cycles > 0,
     "Option \"cycles\" must be at least 1")
-  assert(o._loopPoint >= 1,
+  assert(o._loopPoint > 0,
     "Option \"loopPoint\" must be at least 1")
   assert(direction >= Option.ANIM_NORMAL and
     direction <= Option.ANIM_ALTERNATE_REVERSE,
     "Option \"direction\" must use a valid constant value")
   
-  -- Internal values
+  -- Internal values needed for animation processing
   o._currentFrame = 1
   o._frameTimer = o._duration
   o._remainingCycles = o._cycles
@@ -136,12 +136,7 @@ end
 --[[
   Processes the animation.
 ]]--
-function Animation:animate(dt)
-  if type(dt) ~= Type.NIL then
-    assert(type(dt) == Type.NUMBER,
-      "Argument dt must be of type: "..Type.NUMBER)
-  end
-
+function Animation:animate()
   -- Don't animate if playback paused or there are no frames left to animate
   if self._paused or self._remainingCycles == 0 then
     return
@@ -152,12 +147,7 @@ function Animation:animate(dt)
     self._currentFrame = self._currentFrame + 1
     self._frameTimer = self._duration
   end
-
-  if not dt then
-    self._frameTimer = self._frameTimer - 1
-  else
-    self._frameTimer = self._frameTimer - (dt * #self._quads)
-  end
+  self._frameTimer = self._frameTimer - 1
   
   -- Loop (if necessary)
   if self._currentFrame > #self._quads then
@@ -193,8 +183,8 @@ function Animation:draw(x, y, rotation, scaleX, scaleY)
     "Argument \"scaleY\" must be of type: "..Type.NUMBER)
   
   love.graphics.draw(self._img, self._quads[self._currentFrame],
-    x + (self._offsetX * scaleX), y + (self._offsetY * scaleY), rotation,
-    scaleX, scaleY)
+    x, y, rotation,
+    scaleX, scaleY, -self._offsetX, -self._offsetY)
 end
 
 --[[

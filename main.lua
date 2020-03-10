@@ -40,11 +40,13 @@ function love.load()
   controllers[1]:setInput("fire2", Option.INPUT_KB, "k")
   controllers[1]:setInput("fire3", Option.INPUT_KB, "u")
   controllers[1]:setInput("fire4", Option.INPUT_KB, "i")
+  controllers[1]:setInput("fire5", Option.INPUT_KB, "o")
+  controllers[1]:setInput("fire6", Option.INPUT_KB, "l")
   
   Engine:changeRoom(menu)
 end
 
-function love.update(dt)
+function love.update()
   Engine:update()
 end
 

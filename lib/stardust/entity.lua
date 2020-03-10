@@ -51,8 +51,9 @@ function Entity:draw(originSize)
   if (Engine.debugOptions.showColliders) then
     love.graphics.setColor(1, 0, 0, 0.5)
     for k, collider in pairs(self._colliders) do
-      love.graphics.rectangle("fill", collider.x, collider.y, collider.width,
-        collider.height)
+      self:_updateColliders()
+      love.graphics.rectangle("fill", collider.x, collider.y,
+        collider.width, collider.height)
     end
   end
 
@@ -105,36 +106,42 @@ end
   Returns the horizontal-flipped state for the entity.
 ]]--
 function Entity:getHorizontalDirection()
-  return self._flipX
+  return util.numberToBoolean(1 - self._flipX)
 end
 
 --[[
   Returns the vertical-flipped state for the entity.
 ]]--
 function Entity:getVerticalDirection()
-  return self._flipY
+  return util.numberToBoolean(1 - self._flipY)
 end
 
 --[[
   Flips the entity's graphics horizontally.
 ]]--
 function Entity:flipHorizontally(isFlipped)
-  assert(type(isFlipped) == Type.BOOLEAN,
-    "Argument \"isFlipped\" must be of type: "..Type.BOOLEAN)
-  
-  if isFlipped then self._flipX = -1 else self._flipX = 1 end
-  self:_updateColliders()
+  if type(isFlipped) == Type.NIL then
+    self._flipX = self._flipX - (self._flipX * 2)
+  else
+    assert(type(isFlipped) == Type.BOOLEAN,
+      "Argument \"isFlipped\" must be of type: "..Type.BOOLEAN)
+      
+    if isFlipped then self._flipX = -1 else self._flipX = 1 end
+  end
 end
 
 --[[
   Flips the entity's graphics vertically.
 ]]--
 function Entity:flipVertically(isFlipped)
-  assert(type(isFlipped) == Type.BOOLEAN,
-    "Argument \"isFlipped\" must be of type: "..Type.BOOLEAN)
-  
-  if isFlipped then self._flipY = -1 else self._flipY = 1 end
-  self:_updateColliders()
+  if type(isFlipped) == Type.NIL then
+    self._flipY = self._flipY - (self._flipY * 2)
+  else
+    assert(type(isFlipped) == Type.BOOLEAN,
+      "Argument \"isFlipped\" must be of type: "..Type.BOOLEAN)
+    
+    if isFlipped then self._flipY = -1 else self._flipY = 1 end
+  end
 end
 
 
@@ -142,9 +149,8 @@ end
 --[[
   Processes the entity currently-active animation.
 ]]--
-function Entity:animate(dt)
-  self._animations[self._currentAnimation]:animate(dt)
-  self:_updateColliders()
+function Entity:animate()
+  self._animations[self._currentAnimation]:animate()
 end
 
 --[[
@@ -170,7 +176,6 @@ function Entity:setAnimation(animId)
   
   self._currentAnimation = animId
   self._animations[self._currentAnimation]:reset()
-  self:_updateColliders()
 end
 
 --[[
@@ -215,11 +220,15 @@ end
   Adds a new collider to the entity.
 ]]--
 function Entity:addCollider(colliderId, options)
+  
+  -- Check arguments
   options = options or {}
   assert(type(colliderId) ~= Type.NIL,
     "Argument \"colliderId\" must be defined")
   assert(type(options) == Type.TABLE,
     "Argument \"options\" must be of type: "..Type.TABLE)
+  
+  -- Validate option names
   for option, v in pairs(options) do
     if option ~= "width" and
       option ~= "height" and
@@ -229,17 +238,21 @@ function Entity:addCollider(colliderId, options)
       error("Option \""..option.."\" is not a valid option")
     end
   end
-
+  
+  -- Set option defaults
   self._colliders[colliderId] = {}
   self._colliders[colliderId].x = self._x
   self._colliders[colliderId].y = self._y
   self._colliders[colliderId].width = options.width or 16
   self._colliders[colliderId].height = options.height or 16
+  self._colliders[colliderId].baseWidth = self._colliders[colliderId].width
+  self._colliders[colliderId].baseHeight = self._colliders[colliderId].height
   self._colliders[colliderId].offsetX = options.offsetX or 0
   self._colliders[colliderId].offsetY = options.offsetY or 0
   self._colliders[colliderId].relativity = options.relativity or
     Option.RELATIVE_ORIGIN
-
+  
+  -- Check option types
   assert(type(self._colliders[colliderId].width) == Type.NUMBER,
     "Option \"width\" must be of type: "..Type.NUMBER)
   assert(type(self._colliders[colliderId].height) == Type.NUMBER,
@@ -251,6 +264,7 @@ function Entity:addCollider(colliderId, options)
   assert(type(self._colliders[colliderId].relativity) == Type.NUMBER,
     "Option \"relativity\" must use a valid constant value")
 
+  -- Check option values
   assert(self._colliders[colliderId].width > 0,
     "Option \"width\" must be at least 1")
   assert(self._colliders[colliderId].height > 0,
@@ -258,8 +272,18 @@ function Entity:addCollider(colliderId, options)
   assert(self._colliders[colliderId].relativity >= Option.RELATIVE_ORIGIN and
     self._colliders[colliderId].relativity <= Option.RELATIVE_ACTION_POINT,
     "Option \"relativity\" must use a valid constant value")
+end
 
+--[[
+  Retrieves a collider by its ID.
+]]--
+function Entity:getCollider(colliderId)
+  assert(type(colliderId) ~= Type.NIL,
+    "Argument \"colliderId\" must be defined")
+  
   self:_updateColliders()
+  
+  return self._colliders[colliderId]
 end
 
 --[[
@@ -278,12 +302,17 @@ end
 function Entity:_updateColliders()
   for k, collider in pairs(self._colliders) do
     if collider.relativity == Option.RELATIVE_ORIGIN then
-      collider.x = self._x + collider.offsetX
-      collider.y = self._y + collider.offsetY
+      collider.x = self._x + (collider.offsetX * self._scaleX)
+      collider.y = self._y + (collider.offsetY * self._scaleY)
     elseif collider.relativity == Option.RELATIVE_ACTION_POINT then
-      collider.x = self._x + collider.offsetX + self:getActionPointX()
-      collider.y = self._y + collider.offsetY + self:getActionPointY()
+      collider.x = self._x +
+        ((collider.offsetX + self:getActionPointX()) * self._scaleX)
+      collider.y = self._y +
+        ((collider.offsetY + self:getActionPointY()) * self._scaleY)
     end
+    
+    collider.width = collider.baseWidth * self._scaleX
+    collider.height = collider.baseHeight * self._scaleY
   end
 end
 
@@ -311,7 +340,6 @@ function Entity:setX(x)
     "Argument \"x\" must be of type: "..Type.NUMBER)
   
   self._x = x
-  self:_updateColliders()
 end
 
 --[[
@@ -322,7 +350,6 @@ function Entity:setY(y)
     "Argument \"y\" must be of type: "..Type.NUMBER)
   
   self._y = y
-  self:_updateColliders()
 end
 
 --[[
@@ -373,7 +400,6 @@ end
 ]]--
 function Entity:setRotation(degrees)
   self._rotation = degrees % 360
-  self:_updateColliders()
 end
 
 --[[
@@ -398,7 +424,6 @@ function Entity:setHorizontalScale(scale)
     "Argument \"scale\" must be of type: "..Type.NUMBER)
   
   self._scaleX = math.max(scale, 0)
-  self:_updateColliders()
 end
 
 --[[
@@ -409,7 +434,6 @@ function Entity:setVerticalScale(scale)
     "Argument \"scale\" must be of type: "..Type.NUMBER)
   
   self._scaleY = math.max(scale, 0)
-  self:_updateColliders()
 end
 
 --[[

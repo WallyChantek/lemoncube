@@ -1,22 +1,9 @@
-[ ] Revert animation's DT stuff (check file on desktop computer)
-[/] Big-time clean up
-  [x] engine
-  [x] room
-  [x] entity
-  [ ] animation
-  [x] inputController
-  [x] debugger
-  [x] autoload
-  [x] constants
-  [x] errorHandler
-  [x] helperFunctions
-[/] Engine
-  [/] Base management
-    [/] Entities
-    [/] Input controllers
-  [ ] Z-ordering/layering
-[ ] Test the hell out of everything
+[ ] Make IDs only accept numbers or strings (animations, colliders, inputs, etc.)
+[ ] Test the hell out of everything and fix stuff
+  [ ] Animation
+  [ ] Entity
 
+[ ] Z-ordering/layering of entities
 [ ] Come up with a name for the framework already
 [ ] Look into canvases
 [ ] Make it so you can push/pop gamestates without having to completely change?
