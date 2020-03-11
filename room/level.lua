@@ -33,11 +33,20 @@ function level:load(prevRoom)
     offsetX = -7,
     offsetY = -34,
     actionPoints = {
-      { x = 0, y = -28 },
-      { x = 0, y = -28 },
-      { x = 0, y = -28 },
-      { x = 0, y = -28 },
-      { x = 0, y = -28 }
+      head = {
+        { x = 0, y = -28 },
+        { x = 0, y = -28 },
+        { x = 0, y = -28 },
+        { x = 0, y = -28 },
+        { x = 0, y = -28 }
+      },
+      above = {
+        { x = 0, y = -56 },
+        { x = 0, y = -56 },
+        { x = 0, y = -56 },
+        { x = 0, y = -56 },
+        { x = 0, y = -56 }
+      }
     }
   })
   -- player:addAnimation("idle", imgPlayer, 18, 34)

@@ -207,9 +207,10 @@ end
 --[[
   Returns the X-coordinate position of the animation's current action point.
 ]]--
-function Entity:getActionPointX()
+function Entity:getActionPointX(actionPointId)
   if type(self._animations[self._currentAnimation]) ~= Type.NIL then
-    return self._animations[self._currentAnimation]:getActionPointX()
+    return self._animations[self._currentAnimation]:getActionPointX(
+      actionPointId)
   else
     return 0
   end
@@ -218,9 +219,10 @@ end
 --[[
   Returns the Y-coordinate position of the animation's current action point.
 ]]--
-function Entity:getActionPointY()
+function Entity:getActionPointY(actionPointId)
   if type(self._animations[self._currentAnimation]) ~= Type.NIL then
-    return self._animations[self._currentAnimation]:getActionPointY()
+    return self._animations[self._currentAnimation]:getActionPointY(
+      actionPointId)
   else
     return 0
   end
