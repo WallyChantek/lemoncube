@@ -8,24 +8,30 @@ function level:load(prevRoom)
   -- Initialize objects.
   self.player = Entity:new(128, 128, "default", "player")
   self.player:addCollider("hitbox", {
-    shape = Option.CIRCLE,
+    shape = Option.RECTANGLE,
     width = 16, height = 16,
-    offsetX = 0, offsetY = -16,
+    offsetX = -8, offsetY = -16,
     relativity = Option.RELATIVE_ORIGIN_POINT
   })
   self.player:addCollider("hurtbox1", {
     shape = Option.RECTANGLE,
     width = 8, height = 8,
     offsetX = -4, offsetY = -4,
-    relativity = Option.RELATIVE_ACTION_POINT
+    relativity = Option.RELATIVE_ACTION_POINT,
+    relativeActionPoint = "head"
   })
   self.player:addCollider("hurtbox2", {
     shape = Option.CIRCLE,
     width = 8, height = 8,
     offsetX = 0, offsetY = -17,
-    relativity = Option.RELATIVE_ACTION_POINT
+    relativity = Option.RELATIVE_ACTION_POINT,
+    relativeActionPoint = "above"
   })
   
+  self.player:addAnimation("idle", self.imgPlayer, 18, 34, {
+    offsetX = -7,
+    offsetY = -34
+  })
   self.player:addAnimation("flash", self.imgPlayerFlash, 18, 34, {
     duration = 20,
     shouldLoop = true,
@@ -41,15 +47,15 @@ function level:load(prevRoom)
         { x = 0, y = -28 }
       },
       above = {
-        { x = 0, y = -56 },
-        { x = 0, y = -56 },
-        { x = 0, y = -56 },
-        { x = 0, y = -56 },
-        { x = 0, y = -56 }
+        { x = 0, y = -30 },
+        { x = 0, y = -30 },
+        { x = 0, y = -30 },
+        { x = 0, y = -30 },
+        { x = 0, y = -30 }
       }
     }
   })
-  -- player:addAnimation("idle", imgPlayer, 18, 34)
+  self.player:changeAnimation("flash")
   self.player:setScale(2, 2)
 end
 

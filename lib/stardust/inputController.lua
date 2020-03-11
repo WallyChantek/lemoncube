@@ -41,14 +41,15 @@ end
   Adds a new input or changes an existing input.
 ]]--
 function InputController:setInput(inputId, inputType, input)
-  assert(type(inputId) == Type.STRING,
-    "Argument \"inputId\" must be of type: "..Type.STRING)
-  assert(type(inputType) == Type.NUMBER,
-    "Argument \"inputType\" must use a valid constant value")
-  assert(inputType >= Option.INPUT_KB and inputType <= Option.INPUT_JOY_HAT,
-    "Argument \"inputType\" must use a valid constant value")
-  assert(type(input) == Type.STRING,
-    "Argument \"input\" must be of type: "..Type.STRING)
+  validate.typeString(inputId, "inputId")
+  validate.typeNumber(inputType, "inputType")
+  validate.typeString(input, "input")
+  validate.constant(inputType, "inputType", {
+    Option.INPUT_KB,
+    Option.INPUT_JOY_BTN,
+    Option.INPUT_JOY_AXIS,
+    Option.INPUT_JOY_HAT
+  })
   
   self._inputs[inputId] = {
     inputType = inputType,
@@ -64,9 +65,7 @@ end
   Removes an existing input.
 ]]--
 function InputController:removeInput(inputId)
-  assert(type(inputId) == Type.STRING,
-    "Argument \"inputId\" must be of type: "..Type.STRING)
-  
+  validate.typeString(inputId, "inputId")
   self._inputs[inputId] = nil
 end
 
@@ -74,8 +73,7 @@ end
   Returns whether the target input is currently down/active.
 ]]--
 function InputController:isBeingHeld(inputId)
-  assert(type(inputId) == Type.STRING,
-    "Argument \"inputId\" must be of type: "..Type.STRING)
+  validate.typeString(inputId, "inputId")
   
   local input = self._inputs[inputId]
   if (input.inputType == Option.INPUT_KB) then
@@ -89,9 +87,7 @@ end
   Returns whether the target input was pressed down during the current frame.
 ]]--
 function InputController:wasPressed(inputId)
-  assert(type(inputId) == Type.STRING,
-    "Argument \"inputId\" must be of type: "..Type.STRING)
-  
+  validate.typeString(inputId, "inputId")
   return self._inputs[inputId].wasPressed
 end
 
@@ -99,9 +95,7 @@ end
   Returns whether the target input was released during the current frame.
 ]]--
 function InputController:wasReleased(inputId)
-  assert(type(inputId) == Type.STRING,
-    "Argument \"inputId\" must be of type: "..Type.STRING)
-  
+  validate.typeString(inputId, "inputId")
   return self._inputs[inputId].wasReleased
 end
 

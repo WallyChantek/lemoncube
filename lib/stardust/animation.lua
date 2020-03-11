@@ -10,28 +10,22 @@ function Animation:new(image, width, height, options)
 
   -- Check arguments
   options = options or {}
-  assert(type(image) == Type.USERDATA,
-    "Argument \"image\" must be of type: "..Type.USERDATA)
-  assert(type(width) == Type.NUMBER,
-    "Argument \"width\" must be of type: "..Type.NUMBER)
-  assert(type(height) == Type.NUMBER,
-    "Argument \"height\" must be of type: "..Type.NUMBER)
-  assert(type(options) == Type.TABLE,
-    "Argument \"options\" must be of type: "..Type.TABLE)
+  validate.typeUserdata(image, "image")
+  validate.typeNumber(width, "width")
+  validate.typeNumber(height, "height")
+  validate.typeTable(options, "options")
   
   -- Validate option names
-  for option, v in pairs(options) do
-    if option ~= "duration" and
-      option ~= "shouldLoop" and
-      option ~= "cycles" and
-      option ~= "loopPoint" and
-      option ~= "direction" and
-      option ~= "offsetX" and
-      option ~= "offsetY" and
-      option ~= "actionPoints" then
-      error("Option \""..option.."\" is not a valid option")
-    end
-  end
+  validate.optionNames(options, {
+    "duration",
+    "shouldLoop",
+    "cycles",
+    "loopPoint",
+    "direction",
+    "offsetX",
+    "offsetY",
+    "actionPoints"
+  })
   
   -- Set option defaults
   o._duration = options.duration or 10
@@ -48,37 +42,27 @@ function Animation:new(image, width, height, options)
   
   -- Check option types
   local direction = options.direction or 0
-  assert(type(o._duration) == Type.NUMBER,
-    "Option \"duration\" must be of type: "..Type.NUMBER)
-  assert(type(o._shouldLoop) == Type.BOOLEAN,
-    "Option \"shouldLoop\" must be of type: "..Type.BOOLEAN)
-  assert(type(o._cycles) == Type.NUMBER,
-    "Option \"cycles\" must be of type: "..Type.NUMBER)
-  assert(type(o._loopPoint) == Type.NUMBER,
-    "Option \"loopPoint\" must be of type: "..Type.NUMBER)
-  assert(type(direction) == Type.NUMBER,
-    "Option \"direction\" must use a valid constant value")
-  assert(type(o._offsetX) == Type.NUMBER,
-    "Option \"offsetX\" must be of type: "..Type.NUMBER)
-  assert(type(o._offsetY) == Type.NUMBER,
-    "Option \"offsetY\" must be of type: "..Type.NUMBER)
-  assert(type(o._actionPoints) == Type.TABLE,
-    "Option \"actionPoints\" must be of type: "..Type.TABLE)
+  validate.typeNumber(o._duration, "duration")
+  validate.typeBoolean(o._shouldLoop, "shouldLoop")
+  validate.typeNumber(o._cycles, "cycles")
+  validate.typeNumber(o._loopPoint, "loopPoint")
+  validate.typeNumber(direction, "direction")
+  validate.typeNumber(o._offsetX, "offsetX")
+  validate.typeNumber(o._offsetY, "offsetY")
+  validate.typeTable(o._actionPoints, "actionPoints")
   
   -- Check option data
-  assert(width > 0,
-    "Argument \"width\" must be at least 1")
-  assert(height > 0,
-    "Argument \"height\" must be at least 1")
-  assert(o._duration > 0,
-    "Option \"_duration\" must be at least 1")
-  assert(o._cycles > 0,
-    "Option \"cycles\" must be at least 1")
-  assert(o._loopPoint > 0,
-    "Option \"loopPoint\" must be at least 1")
-  assert(direction >= Option.ANIM_NORMAL and
-    direction <= Option.ANIM_ALTERNATE_REVERSE,
-    "Option \"direction\" must use a valid constant value")
+  validate.atLeast(width, "width", 1)
+  validate.atLeast(height, "height", 1)
+  validate.atLeast(o._duration, "duration", 1)
+  validate.atLeast(o._cycles, "cycles", 1)
+  validate.atLeast(o._loopPoint, "loopPoint", 1)
+  validate.constant(direction, "direction", {
+    Option.ANIM_NORMAL,
+    Option.ANIM_REVERSE,
+    Option.ANIM_ALTERNATE,
+    Option.ANIM_ALTERNATE_REVERSE
+  })
   
   -- Internal values needed for animation processing
   o._currentFrame = 1
@@ -107,26 +91,36 @@ function Animation:new(image, width, height, options)
   end
 
   -- Validate action point data
-  if #o._actionPoints > 0 then
-    assert(#o._actionPoints == #o._quads,
-      "Option \"actionPoint\" must match number of frames in animation")
+  if util.size(o._actionPoints) > 0 then
+    for apName, apPairs in pairs(o._actionPoints) do
+      -- Verify that number of action point pairs is correct
+      validate.equals(util.size(apPairs), "apPairs", util.size(o._quads),
+        " must match number of frames in animation")
+      
+      -- Iterate through each action point pair
+      for k, apPair in pairs(apPairs) do
+        -- Validate action point pair options
+        validate.optionNames(apPair, {"x", "y"})
+        
+        -- Validation action point pair types
+        validate.typeNumber(apPair.x, "x")
+        validate.typeNumber(apPair.y, "y")
+      end
 
-    -- Reverse action point data if necessary
-    if o._isReversed then
-      util.reverseTable(o._actionPoints)
-    end
-  else
-    -- If no action point data is supplied, just default everything to 0,0
-    for i = 1, #o._quads, 1 do
-      table.insert(o._actionPoints, { x=0, y=0 })
+      -- Reverse action point data if necessary
+      if o._isReversed then
+        util.reverseTable(apPairs)
+      end
     end
   end
 
-  -- Insert additional frames if set to ping-pong (reverse) at end
+  -- Insert additional frames (and action points) if set to alternate
   if o._shouldAlternate then
-    for i = #o._quads - 1, o._loopPoint + 1, -1 do
+    for i = util.size(o._quads) - 1, o._loopPoint + 1, -1 do
       table.insert(o._quads, o._quads[i])
-      table.insert(o._actionPoints, o._actionPoints[i])
+      for actionPointName, actionPointPairs in pairs(o._actionPoints) do
+        table.insert(actionPointPairs, actionPointPairs[i])
+      end
     end
   end
 
@@ -150,7 +144,7 @@ function Animation:animate()
   self._frameTimer = self._frameTimer - 1
   
   -- Loop (if necessary)
-  if self._currentFrame > #self._quads then
+  if self._currentFrame > util.size(self._quads) then
     if self._shouldLoop then
       -- Reset if animation should loop indefinitely
       self._currentFrame = self._loopPoint
@@ -161,7 +155,7 @@ function Animation:animate()
       if self._remainingCycles > 0 or self._shouldAlternate then
         self._currentFrame = self._loopPoint
       else
-        self._currentFrame = #self._quads
+        self._currentFrame = util.size(self._quads)
       end
     end
   end
@@ -171,16 +165,11 @@ end
   Displays the current frame of the animation.
 --]]
 function Animation:draw(x, y, rotation, scaleX, scaleY)
-  assert(type(x) == Type.NUMBER,
-    "Argument \"x\" must be of type: "..Type.NUMBER)
-  assert(type(y) == Type.NUMBER,
-    "Argument \"y\" must be of type: "..Type.NUMBER)
-  assert(type(rotation) == Type.NUMBER,
-    "Argument \"rotation\" must be of type: "..Type.NUMBER)
-  assert(type(scaleX) == Type.NUMBER,
-    "Argument \"scaleX\" must be of type: "..Type.NUMBER)
-  assert(type(scaleY) == Type.NUMBER,
-    "Argument \"scaleY\" must be of type: "..Type.NUMBER)
+  validate.typeNumber(x, "x")
+  validate.typeNumber(y, "y")
+  validate.typeNumber(rotation, "rotation")
+  validate.typeNumber(scaleX, "scaleX")
+  validate.typeNumber(scaleY, "scaleY")
   
   love.graphics.draw(self._img, self._quads[self._currentFrame],
     x, y, rotation,
@@ -228,13 +217,21 @@ end
 --[[
   Returns the X-coordinate position of the current frame's action point.
 ]]--
-function Animation:getActionPointX()
-  return self._actionPoints[self._currentFrame].x
+function Animation:getActionPointX(actionPointId)
+  if type(self._actionPoints[actionPointId]) ~= Type.NIL then
+    return self._actionPoints[actionPointId][self._currentFrame].x
+  else
+    return 0
+  end
 end
 
 --[[
   Returns the Y-coordinate position of the current frame's action point.
 ]]--
-function Animation:getActionPointY()
-  return self._actionPoints[self._currentFrame].y
+function Animation:getActionPointY(actionPointId)
+  if type(self._actionPoints[actionPointId]) ~= Type.NIL then
+    return self._actionPoints[actionPointId][self._currentFrame].y
+  else
+    return 0
+  end
 end

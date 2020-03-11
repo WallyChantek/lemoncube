@@ -9,8 +9,7 @@ function Room:new(roomName)
   setmetatable(o, Room)
 
   roomName = roomName or "(untitled)"
-  assert(type(roomName) == Type.STRING,
-    "Argument \"roomName\" must be of type: "..Type.STRING)
+  validate.typeString(roomName, "roomName")
 
   o._roomName = roomName
 

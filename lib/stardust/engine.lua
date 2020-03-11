@@ -63,15 +63,14 @@ end
   Fowards a Love event handler down to the currently-active room.
 ]]--
 function Engine:forwardEvent(event, data)
-  assert(type(event) == Type.STRING,
-    "Argument \"event\" must be of type: "..Type.STRING)
-
+  validate.typeString(event, "event")
+  
+  -- Nothing to forward if active room doesn't have this event
   if type(Engine._currentRoom[event]) == Type.NIL then return end
-
+  
+  -- Forward event
   data = data or {}
-  assert(type(data) == Type.TABLE,
-    "Argument \"data\" must be of type: "..Type.TABLE)
-
+  validate.typeTable(data, "data")
   Engine._currentRoom[event](Engine._currentRoom, unpack(data))
 end
 
@@ -81,17 +80,14 @@ end
 function Engine:enableDebugMode(options)
   -- Check arguments
   options = options or {}
-  assert(type(options) == Type.TABLE,
-    "Argument \"options\" must be of type: "..Type.TABLE)
+  validate.typeTable(options, "options")
 
   -- Validate option names
-  for option, v in pairs(options) do
-    if option ~= "showOverlay" and
-      option ~= "showColliders" and
-      option ~= "originCrosshairRadius" then
-      error("Option \""..option.."\" is not a valid option")
-    end
-  end
+  validate.optionNames(options, {
+    "showOverlay",
+    "showColliders",
+    "originCrosshairRadius"
+  })
 
   -- Set option defaults
   options.showOverlay = options.showOverlay or false
@@ -99,16 +95,12 @@ function Engine:enableDebugMode(options)
   options.originCrosshairRadius = options.originCrosshairRadius or 0
 
   -- Check option types
-  assert(type(options.showOverlay) == Type.BOOLEAN,
-    "Option \"showOverlay\" must be of type: "..Type.BOOLEAN)
-  assert(type(options.showColliders) == Type.BOOLEAN,
-    "Option \"showColliders\" must be of type: "..Type.BOOLEAN)
-  assert(type(options.originCrosshairRadius) == Type.NUMBER,
-    "Option \"originCrosshairRadius\" must be of type: "..Type.NUMBER)
+  validate.typeBoolean(options.showOverlay, "showOverlay")
+  validate.typeBoolean(options.showColliders, "showColliders")
+  validate.typeNumber(options.originCrosshairRadius, "originCrosshairRadius")
   
   -- Check option values
-  assert(options.originCrosshairRadius >= 0,
-    "Argument \"originCrosshairRadius\" must be at least 0")
+  validate.atLeast(options.originCrosshairRadius, "originCrosshairRadius", 0)
 
   -- Create debugger object & save option settings
   Engine._debugger = Debugger:new()
@@ -134,8 +126,7 @@ end
   Changes the currently-active game state.
 ]]--
 function Engine:changeRoom(room)
-  assert(type(room) == Type.TABLE,
-    "Argument \"room\" must be of type: "..Type.TABLE)
+  validate.typeTable(room, "room")
 
   -- Clean up the room we're about to leave
   local prevRoom = nil

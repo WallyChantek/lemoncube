@@ -9,10 +9,8 @@ function Entity:new(x, y)
   setmetatable(o, Entity)
   
   -- Check arguments
-  assert(type(x) == Type.NUMBER,
-    "Argument \"x\" must be of type: "..Type.NUMBER)
-  assert(type(y) == Type.NUMBER,
-    "Argument \"y\" must be of type: "..Type.NUMBER)
+  validate.typeNumber(x, "x")
+  validate.typeNumber(y, "y")
 
   -- Marker indicating this is an entity (used in room cleanup)
   o.isEntity = true
@@ -85,12 +83,9 @@ end
   Sets the color influence for the entity's graphics.
 ]]--
 function Entity:setColorTint(r, g, b)
-  assert(type(r) == Type.NUMBER,
-    "Argument \"r\" must be of type: "..Type.NUMBER)
-  assert(type(g) == Type.NUMBER,
-    "Argument \"g\" must be of type: "..Type.NUMBER)
-  assert(type(b) == Type.NUMBER,
-    "Argument \"b\" must be of type: "..Type.NUMBER)
+  validate.typeNumber(r, "r")
+  validate.typeNumber(g, "g")
+  validate.typeNumber(b, "b")
   
   self._rgba.r = math.clamp(r, 0, 1)
   self._rgba.g = math.clamp(g, 0, 1)
@@ -101,8 +96,7 @@ end
   Sets the alpha/semi-transparency for the entity's graphics.
 ]]--
 function Entity:setTransparency(a)
-  assert(type(a) == Type.NUMBER,
-    "Argument \"a\" must be of type: "..Type.NUMBER)
+  validate.typeNumber(a, "a")
   
   self._rgba.a = math.clamp(a, 0, 1)
 end
@@ -128,9 +122,7 @@ function Entity:flipHorizontally(isFlipped)
   if type(isFlipped) == Type.NIL then
     self._flipX = self._flipX - (self._flipX * 2)
   else
-    assert(type(isFlipped) == Type.BOOLEAN,
-      "Argument \"isFlipped\" must be of type: "..Type.BOOLEAN)
-      
+    validate.typeBoolean(isFlipped, "isFlipped")
     if isFlipped then self._flipX = -1 else self._flipX = 1 end
   end
 end
@@ -142,9 +134,7 @@ function Entity:flipVertically(isFlipped)
   if type(isFlipped) == Type.NIL then
     self._flipY = self._flipY - (self._flipY * 2)
   else
-    assert(type(isFlipped) == Type.BOOLEAN,
-      "Argument \"isFlipped\" must be of type: "..Type.BOOLEAN)
-    
+    validate.typeBoolean(isFlipped, "isFlipped")
     if isFlipped then self._flipY = -1 else self._flipY = 1 end
   end
 end
@@ -162,8 +152,7 @@ end
   Adds an animation to the entity.
 ]]--
 function Entity:addAnimation(animationId, image, width, height, options)
-  assert(type(animationId) == Type.STRING,
-    "Argument \"animationId\" must be of type: "..Type.STRING)
+  validate.typeString(animationId, "animationId")
   
   self._animations[animationId] = Animation:new(image, width, height, options)
   
@@ -176,11 +165,10 @@ end
   Changes the current animation.
 ]]--
 function Entity:changeAnimation(animationId)
-  assert(type(animationId) == Type.STRING,
-    "Argument \"animationId\" must be of type: "..Type.STRING)
+  validate.typeString(animationId, "animationId")
   
   self._currentAnimation = animationId
-  self._animations[self._currentAnimation]:reset()
+  self._animations[self._currentAnimation]:restart()
 end
 
 --[[
@@ -237,73 +225,67 @@ function Entity:addCollider(colliderId, options)
   
   -- Check arguments
   options = options or {}
-  assert(type(colliderId) == Type.STRING,
-    "Argument \"colliderId\" must be of type: "..Type.STRING)
-  assert(type(options) == Type.TABLE,
-    "Argument \"options\" must be of type: "..Type.TABLE)
+  validate.typeString(colliderId, "colliderId")
+  validate.typeTable(options, "options")
   
   -- Validate option names
-  for option, v in pairs(options) do
-    if option ~= "shape" and
-      option ~= "width" and
-      option ~= "height" and
-      option ~= "offsetX" and
-      option ~= "offsetY" and
-      option ~= "relativity" then
-      error("Option \""..option.."\" is not a valid option")
-    end
-  end
+  validate.optionNames(options, {
+    "shape",
+    "width",
+    "height",
+    "offsetX",
+    "offsetY",
+    "relativity",
+    "relativeActionPoint"
+  })
   
   -- Set option defaults
-  self._colliders[colliderId] = {}
-  self._colliders[colliderId].x = self._x
-  self._colliders[colliderId].y = self._y
-  self._colliders[colliderId].shape = options.shape or Option.RECTANGLE
-  self._colliders[colliderId].width = options.width or 16
-  self._colliders[colliderId].height = options.height or 16
-  self._colliders[colliderId].baseWidth = self._colliders[colliderId].width
-  self._colliders[colliderId].baseHeight = self._colliders[colliderId].height
-  self._colliders[colliderId].offsetX = options.offsetX or 0
-  self._colliders[colliderId].offsetY = options.offsetY or 0
-  self._colliders[colliderId].relativity = options.relativity or
+  local collider = {}
+  collider.x = self._x
+  collider.y = self._y
+  collider.shape = options.shape or Option.RECTANGLE
+  collider.width = options.width or 16
+  collider.height = options.height or 16
+  collider.baseWidth = collider.width
+  collider.baseHeight = collider.height
+  collider.offsetX = options.offsetX or 0
+  collider.offsetY = options.offsetY or 0
+  collider.relativity = options.relativity or
     Option.RELATIVE_ORIGIN_POINT
+  collider.relativeActionPoint = options.relativeActionPoint
   
   -- Check option types
-  assert(type(self._colliders[colliderId].shape) == Type.NUMBER,
-    "Option \"shape\" must use a valid constant value")
-  assert(type(self._colliders[colliderId].width) == Type.NUMBER,
-    "Option \"width\" must be of type: "..Type.NUMBER)
-  assert(type(self._colliders[colliderId].height) == Type.NUMBER,
-    "Option \"height\" must be of type: "..Type.NUMBER)
-  assert(type(self._colliders[colliderId].offsetX) == Type.NUMBER,
-    "Option \"offsetX\" must be of type: "..Type.NUMBER)
-  assert(type(self._colliders[colliderId].offsetY) == Type.NUMBER,
-    "Option \"offsetY\" must be of type: "..Type.NUMBER)
-  assert(type(self._colliders[colliderId].relativity) == Type.NUMBER,
-    "Option \"relativity\" must use a valid constant value")
+  validate.typeNumber(collider.shape, "shape")
+  validate.typeNumber(collider.width, "width")
+  validate.typeNumber(collider.height, "height")
+  validate.typeNumber(collider.offsetX, "offsetX")
+  validate.typeNumber(collider.offsetY, "offsetY")
+  validate.constant(collider.relativity, "relativity", {
+    Option.RELATIVE_ORIGIN_POINT,
+    Option.RELATIVE_ACTION_POINT
+  })
+  if collider.relativity == Option.RELATIVE_ACTION_POINT then
+    validate.typeString(collider.relativeActionPoint, "relativeActionPoint")
+  end
 
   -- Check option values
-  assert(self._colliders[colliderId].shape >= Option.RECTANGLE
-    and self._colliders[colliderId].shape <= Option.CIRCLE,
-    "Option \"shape\" must use a valid constant value")
-  assert(self._colliders[colliderId].width >= 1,
-    "Option \"width\" must be at least 1")
-  assert(self._colliders[colliderId].height >= 1,
-    "Option \"height\" must be at least 1")
-  assert(self._colliders[colliderId].relativity >= Option.RELATIVE_ORIGIN_POINT
-    and self._colliders[colliderId].relativity <= Option.RELATIVE_ACTION_POINT,
-    "Option \"relativity\" must use a valid constant value")
+  validate.constant(collider.shape, "shape", {
+    Option.RECTANGLE,
+    Option.CIRCLE
+  })
+  validate.atLeast(collider.width, "width", 1)
+  validate.atLeast(collider.height, "height", 1)
+  
+  -- Add to entity's list of colliders
+  self._colliders[colliderId] = collider
 end
 
 --[[
   Retrieves a collider by its ID.
 ]]--
 function Entity:getCollider(colliderId)
-  assert(type(colliderId) == Type.STRING,
-    "Argument \"colliderId\" must be of type: "..Type.STRING)
-  
+  validate.typeString(colliderId, "colliderId")
   self:_updateColliders()
-  
   return self._colliders[colliderId]
 end
 
@@ -311,9 +293,7 @@ end
   Removes an existing collider from the entity.
 ]]--
 function Entity:removeCollider(colliderId)
-  assert(type(colliderId) == Type.STRING,
-    "Argument \"colliderId\" must be of type: "..Type.STRING)
-  
+  validate.typeString(colliderId, "colliderId")
   self._colliders[colliderId] = nil
 end
 
@@ -335,8 +315,8 @@ function Entity:_updateColliders()
     local offsetX = collider.offsetX
     local offsetY = collider.offsetY
     if collider.relativity == Option.RELATIVE_ACTION_POINT then
-      offsetX = offsetX + self:getActionPointX()
-      offsetY = offsetY + self:getActionPointY()
+      offsetX = offsetX + self:getActionPointX(collider.relativeActionPoint)
+      offsetY = offsetY + self:getActionPointY(collider.relativeActionPoint)
     end
     
     -- Reposition offset to rectangle's actual midpoint (gets undone later)
@@ -387,9 +367,7 @@ end
   Sets the entity's X-axis position.
 ]]--
 function Entity:setX(x)
-  assert(type(x) == Type.NUMBER,
-    "Argument \"x\" must be of type: "..Type.NUMBER)
-  
+  validate.typeNumber(x, "x")
   self._x = x
 end
 
@@ -397,9 +375,7 @@ end
   Sets the entity's Y-axis position.
 ]]--
 function Entity:setY(y)
-  assert(type(y) == Type.NUMBER,
-    "Argument \"y\" must be of type: "..Type.NUMBER)
-  
+  validate.typeNumber(y, "y")
   self._y = y
 end
 
@@ -415,9 +391,7 @@ end
   Moves the entity's position horizontally by a specified amount.
 ]]--
 function Entity:moveX(pixels)
-  assert(type(pixels) == Type.NUMBER,
-    "Argument \"pixels\" must be of type: "..Type.NUMBER)
-  
+  validate.typeNumber(pixels, "pixels")
   self:setX(self._x + pixels)
 end
 
@@ -425,9 +399,7 @@ end
   Moves the entity's position vertically by a specified amount.
 ]]--
 function Entity:moveY(pixels)
-  assert(type(pixels) == Type.NUMBER,
-    "Argument \"pixels\" must be of type: "..Type.NUMBER)
-  
+  validate.typeNumber(pixels, "pixels")
   self:setY(self._y + pixels)
 end
 
@@ -471,9 +443,7 @@ end
   Sets the horizontal scale for the entity's graphics.
 ]]--
 function Entity:setHorizontalScale(scale)
-  assert(type(scale) == Type.NUMBER,
-    "Argument \"scale\" must be of type: "..Type.NUMBER)
-  
+  validate.typeNumber(scale, "scale")
   self._scaleX = math.max(scale, 0)
 end
 
@@ -481,9 +451,7 @@ end
   Sets the vertical scale for the entity's graphics.
 ]]--
 function Entity:setVerticalScale(scale)
-  assert(type(scale) == Type.NUMBER,
-    "Argument \"scale\" must be of type: "..Type.NUMBER)
-  
+  validate.typeNumber(scale, "scale")
   self._scaleY = math.max(scale, 0)
 end
 
@@ -499,9 +467,7 @@ end
   Scales the entity's graphics horizontally.
 ]]--
 function Entity:scaleHorizontally(scale)
-  assert(type(scale) == Type.NUMBER,
-    "Argument \"scale\" must be of type: "..Type.NUMBER)
-  
+  validate.typeNumber(scale, "scale")
   self:setHorizontalScale(self._scaleX + scale)
 end
 
@@ -509,9 +475,7 @@ end
   Scales the entity's graphics vertically.
 ]]--
 function Entity:scaleVertically(scale)
-  assert(type(scale) == Type.NUMBER,
-    "Argument \"scale\" must be of type: "..Type.NUMBER)
-  
+  validate.typeNumber(scale, "scale")
   self:setVerticalScale(self._scaleY + scale)
 end
 
