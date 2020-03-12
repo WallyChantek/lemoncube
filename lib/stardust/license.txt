@@ -1,0 +1,25 @@
+I hereby permit you to (mostly) do whatever you want with this framework. Just
+please adhere to a couple things:
+
+1) Don't outright claim primary authorship of these files (don't be a jerk)
+2) Leave this notice in if you use the library as a whole (you don't need to
+   include it if you pull pieces or files from it, just if you include the
+   entire package)
+
+Like, that's it. Otherwise, I don't really care. You don't even need to put my
+name in the credits or distribute this file with your game (outside of the
+source files; in other words, please just leave it in the .love file in this
+package/directory).
+
+I don't care about who owns what code snippets and any other inanity like that.
+That sort of mentality is why there are so many stupid lawsuits and other
+nonsense in other artistic industries. Cool, we used the same chord progression
+or color palette or collision-detection function or whatever. Who really cares?
+
+In my mind, a piece of code is not much different than a key or scale or chord
+in a song, or a shape or design concept in art (like a character having black
+hair or a white shirt or whatever).
+
+The constitution of the whole is what creates ownership and value. Just as we
+are the sum of our experiences, the sum of those parts is what makes something
+worthwhile: a song, a picture, a piece of software.
