@@ -86,18 +86,21 @@ function Engine:enableDebugMode(options)
   validate.optionNames(options, {
     "showOverlay",
     "showColliders",
-    "originCrosshairRadius"
+    "originCrosshairRadius",
+    "highlightCollisions"
   })
 
   -- Set option defaults
   options.showOverlay = options.showOverlay or false
   options.showColliders = options.showColliders or false
   options.originCrosshairRadius = options.originCrosshairRadius or 0
+  options.highlightCollisions = options.highlightCollisions or false
 
   -- Check option types
   validate.typeBoolean(options.showOverlay, "showOverlay")
   validate.typeBoolean(options.showColliders, "showColliders")
   validate.typeNumber(options.originCrosshairRadius, "originCrosshairRadius")
+  validate.typeBoolean(options.highlightCollisions, "highlightCollisions")
   
   -- Check option values
   validate.atLeast(options.originCrosshairRadius, "originCrosshairRadius", 0)
@@ -150,4 +153,62 @@ end
 ]]--
 function Engine:getCurrentRoomName()
   return Engine._currentRoom:getName()
+end
+
+function Engine:checkCollision(colliderA, colliderB)
+  collisionOccurred = false
+  
+  if colliderA.shape == Option.RECTANGLE and colliderB.shape == Option.RECTANGLE then
+    -- Both colliders are rectangles
+    if colliderA.x < colliderB.x + colliderB.width and
+      colliderA.x + colliderA.width > colliderB.x and
+      colliderA.y < colliderB.y + colliderB.height and
+      colliderA.y + colliderA.height > colliderB.y then
+      collisionOccurred = true
+    end
+  elseif colliderA.shape == Option.CIRCLE and colliderB.shape == Option.CIRCLE then
+    -- Both colliders are circles
+    local dX = colliderA.x - colliderB.x
+    local dY = colliderA.y - colliderB.y
+    collisionOccurred = (math.sqrt(dX * dX + dY * dY) <
+      (colliderA.radius + colliderB.radius))
+  else
+    -- One collider is a rectangle and the other is a circle
+    if colliderA.shape == Option.CIRCLE then
+      colliderA, colliderB = colliderB, colliderA
+    end
+    local rect = colliderA
+    local circle = colliderB
+    
+    local testX = circle.x
+    local testY = circle.y
+    
+    -- Find closest edge
+    if circle.x < rect.x then
+      testX = rect.x
+    elseif circle.x > rect.x + rect.width then
+      testX = rect.x + rect.width
+    end
+    if circle.y < rect.y then
+      testY = rect.y
+    elseif circle.y > rect.y + rect.height then
+      testY = rect.y + rect.height
+    end
+    
+    -- Calculate distances based on closest edges
+    local distX = circle.x - testX
+    local distY = circle.y - testY
+    local distance = math.sqrt((distX * distX) + (distY * distY))
+    
+    -- Collision check
+    collisionOccurred = (distance <= circle.radius)
+  end
+  
+  if collisionOccurred then
+    colliderA.isColliding = true
+    colliderB.isColliding = true
+  end
+  
+  -- Return whether a collision happened
+  return collisionOccurred
 end

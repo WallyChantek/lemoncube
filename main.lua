@@ -12,7 +12,8 @@ function love.load()
   Engine:enableDebugMode({
     showOverlay = true,
     showColliders = true,
-    originCrosshairRadius = 8
+    originCrosshairRadius = 8,
+    highlightCollisions = true
   })
 
   path_res_img = "res/img/"

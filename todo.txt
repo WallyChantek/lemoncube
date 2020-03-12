@@ -1,8 +1,5 @@
 -- Current To-do List ----------------------------------------------------------
 -- High priority
-[ ] Engine
-  [ ] Collisions
-[ ] Review TODOs
 [ ] Reconsider names/collections of various constants
 
 -- Normal priority

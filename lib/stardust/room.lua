@@ -24,6 +24,7 @@ function Room:updateRoom()
   for k, v in pairs(self) do
     if type(v) ~= Type.FUNCTION and v._isEntity then
       v:_animate()
+      v:_updateColliders()
     end
   end
 

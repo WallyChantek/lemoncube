@@ -6,7 +6,7 @@ function level:load(prevRoom)
   self.imgPlayerFlash = love.graphics.newImage(res.sprite.girlFlash)
   
   -- Initialize objects.
-  self.player = Entity:new(128, 128, "default", "player")
+  self.player = Entity:new(128, 128)
   self.player:addCollider("hitbox", {
     shape = Option.RECTANGLE,
     width = 16, height = 16,
@@ -22,7 +22,7 @@ function level:load(prevRoom)
   })
   self.player:addCollider("hurtbox2", {
     shape = Option.CIRCLE,
-    width = 8, height = 8,
+    radius = 8,
     offsetX = 0, offsetY = -17,
     relativity = Option.RELATIVE_ACTION_POINT,
     relativeActionPoint = "above"
@@ -57,20 +57,34 @@ function level:load(prevRoom)
   })
   self.player:changeAnimation("flash")
   self.player:setScale(2, 2)
-  self.player:setAnimationFrameDuration(60)
+  self.player.MOVE_SPEED = 1
+  
+  
+  self.goomba1 = Entity:new(196, 169)
+  self.goomba1:addCollider("hitbox", {
+    shape = Option.RECTANGLE,
+    width = 16, height = 16,
+    offsetX = -8, offsetY = -8
+  })
+  
+  self.goomba2 = Entity:new(64, 64)
+  self.goomba2:addCollider("hitbox", {
+    shape = Option.CIRCLE,
+    radius = 16
+  })
 end
 
 function level:update()
   if controllers[1]:isBeingHeld("up") then
-    self.player:moveY(-3)
+    self.player:moveY(-self.player.MOVE_SPEED)
   elseif controllers[1]:isBeingHeld("down") then
-    self.player:moveY(3)
+    self.player:moveY(self.player.MOVE_SPEED)
   end
   
   if controllers[1]:isBeingHeld("left") then
-    self.player:moveX(-3)
+    self.player:moveX(-self.player.MOVE_SPEED)
   elseif controllers[1]:isBeingHeld("right") then
-    self.player:moveX(3)
+    self.player:moveX(self.player.MOVE_SPEED)
   end
 
   if controllers[1]:wasPressed("fire3") then self.player:flipHorizontally() end
@@ -79,6 +93,13 @@ function level:update()
   if controllers[1]:isBeingHeld("fire6") then self.player:rotate(1) end
   if controllers[1]:isBeingHeld("fire4") then self.player:scale(0.1, 0.1) end
   if controllers[1]:isBeingHeld("fire2") then self.player:scale(-0.1, -0.1) end
+  -- if controllers[1]:isBeingHeld("fire4") then self.player:scaleHorizontally(0.1) end
+  -- if controllers[1]:isBeingHeld("fire2") then self.player:scaleVertically(0.1) end
+  
+  for k, collider in pairs(self.player:getColliders()) do
+    Engine:checkCollision(collider, self.goomba1:getCollider("hitbox"))
+    Engine:checkCollision(collider, self.goomba2:getCollider("hitbox"))
+  end
 end
 
 function level:keypressed(key, scancode, isrepeat)

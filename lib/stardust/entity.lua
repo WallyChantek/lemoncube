@@ -44,22 +44,27 @@ function Entity:_draw(originSize)
   if self._isVisible and self._colorMix.a > 0 then
     love.graphics.setColor(self._colorMix.r, self._colorMix.g, self._colorMix.b,
       self._colorMix.a)
-    self._animations[self._activeAnimation]:draw(self._x, self._y,
-      math.rad(self._angle), self._horizontalFlip * self._xScale,
-      self._verticalFlip * self._yScale)
+    if type(self._animations[self._activeAnimation]) ~= Type.NIL then
+      self._animations[self._activeAnimation]:draw(self._x, self._y,
+        math.rad(self._angle), self._horizontalFlip * self._xScale,
+        self._verticalFlip * self._yScale)
+    end
   end
   
   -- Draw collider(s)
   if (Engine.debugOptions.showColliders) then
-    love.graphics.setColor(1, 0, 0, 0.5)
     for k, collider in pairs(self._colliders) do
-      self:_updateColliders()
+      if Engine.debugOptions.highlightCollisions and collider.isColliding then
+        love.graphics.setColor(0, 1, 0, 0.5)
+      else
+        love.graphics.setColor(1, 0, 0, 0.5)
+      end
+      
       if collider.shape == Option.RECTANGLE then
         love.graphics.rectangle("fill", collider.x, collider.y,
           collider.width, collider.height)
       else
-        love.graphics.ellipse("fill", collider.x, collider.y,
-          collider.width / 2, collider.height / 2)
+        love.graphics.circle("fill", collider.x, collider.y, collider.radius)
       end
     end
   end
@@ -189,7 +194,9 @@ end
   Processes the entity currently-active animation.
 ]]--
 function Entity:_animate()
-  self._animations[self._activeAnimation]:animate()
+  if type(self._animations[self._activeAnimation]) ~= Type.NIL then
+    self._animations[self._activeAnimation]:animate()
+  end
 end
 
 --[[
@@ -301,7 +308,6 @@ end
   Adds a new collider to the entity.
 ]]--
 function Entity:addCollider(colliderName, options)
-  
   -- Check arguments
   options = options or {}
   validate.typeString(colliderName, "colliderName")
@@ -312,6 +318,7 @@ function Entity:addCollider(colliderName, options)
     "shape",
     "width",
     "height",
+    "radius",
     "offsetX",
     "offsetY",
     "relativity",
@@ -325,13 +332,16 @@ function Entity:addCollider(colliderName, options)
   collider.shape = options.shape or Option.RECTANGLE
   collider.width = options.width or 16
   collider.height = options.height or 16
+  collider.radius = options.radius or 8
   collider.baseWidth = collider.width
   collider.baseHeight = collider.height
+  collider.baseRadius = collider.radius
   collider.offsetX = options.offsetX or 0
   collider.offsetY = options.offsetY or 0
   collider.relativity = options.relativity or
     Option.RELATIVE_ORIGIN_POINT
   collider.relativeActionPoint = options.relativeActionPoint
+  collider.isColliding = false
   
   -- Check option types
   validate.typeNumber(collider.shape, "shape")
@@ -354,9 +364,23 @@ function Entity:addCollider(colliderName, options)
   })
   validate.atLeast(collider.width, "width", 1)
   validate.atLeast(collider.height, "height", 1)
+  if collider.shape == Option.RECTANGLE then
+    if type(options.radius) ~= Type.NIL then
+      error("Cannot use option \"radius\" with shape \"rectangle\"")
+    end
+  else
+    if type(options.width) ~= Type.NIL then
+      error("Cannot use option \"width\" with shape \"circle\"")
+    elseif type(options.height) ~= Type.NIL then
+      error("Cannot use option \"height\" with shape \"circle\"")
+    end
+  end
   
   -- Add to entity's list of colliders
   self._colliders[colliderName] = collider
+  
+  -- Update colliders
+  self:_updateColliders()
 end
 
 --[[
@@ -372,23 +396,36 @@ end
 ]]--
 function Entity:getCollider(colliderName)
   validate.typeString(colliderName, "colliderName")
-  self:_updateColliders()
   return self._colliders[colliderName]
+end
+
+--[[
+  Retrieves all colliders.
+]]--
+function Entity:getColliders()
+  return self._colliders
 end
 
 --[[
   Updates the collider's position based on its relativity setting.
 ]]--
 function Entity:_updateColliders()
+  local r = math.rad(self._angle)
+  local scaleX = self._xScale -
+    ((self._xScale - self._yScale) * math.abs(math.sin(r)))
+  local scaleY = self._yScale -
+    ((self._yScale - self._xScale) * math.abs(math.sin(r)))
+  
   for k, collider in pairs(self._colliders) do
     -- Recalculate object's size relative to entity's scale
-    local r = math.rad(self._angle)
-    local scaleX = self._xScale -
-      ((self._xScale - self._yScale) * math.abs(math.sin(r)))
-    local scaleY = self._yScale -
-      ((self._yScale - self._xScale) * math.abs(math.sin(r)))
-    collider.width = collider.baseWidth * scaleX
-    collider.height = collider.baseHeight * scaleY
+    if collider.shape == Option.RECTANGLE then
+      collider.width = collider.baseWidth * scaleX
+      collider.height = collider.baseHeight * scaleY
+    else
+      collider.radius = collider.baseRadius *
+        math.average(self._xScale, self._yScale)
+    end
+    
     
     -- Offset for positioning the collider relatively
     local offsetX = collider.offsetX
@@ -423,17 +460,35 @@ function Entity:_updateColliders()
     -- Set position to entity's position plus the calculated offset
     collider.x = self._x + offsetX
     collider.y = self._y + offsetY
+    
+    -- Untoggle the entity's collision state
+    collider.isColliding = false
   end
 end
 
 
 -- Transformations -------------------------------------------------------------
 --[[
+  Internal function for setting entity's X-axis position.
+]]--
+function Entity:_setX(x, updateColliders)
+  self._x = x
+end
+
+--[[
+  Internal function for setting entity's Y-axis position.
+]]--
+function Entity:_setY(y, updateColliders)
+  self._y = y
+end
+
+--[[
   Sets the entity's X-axis position.
 ]]--
 function Entity:setX(x)
-  validate.typeNumber(x, "x")
-  self._x = x
+validate.typeNumber(x, "x")
+  self:_setX(x)
+  self:_updateColliders()
 end
 
 --[[
@@ -441,15 +496,19 @@ end
 ]]--
 function Entity:setY(y)
   validate.typeNumber(y, "y")
-  self._y = y
+  self:_setY(y)
+  self:_updateColliders()
 end
 
 --[[
   Sets the entity's X & Y positions.
 ]]--
 function Entity:setPosition(x, y)
-  self:setX(x)
-  self:setY(y)
+  validate.typeNumber(x, "x")
+  validate.typeNumber(y, "y")
+  self:_setX(x)
+  self:_setY(y)
+  self:_updateColliders()
 end
 
 --[[
@@ -457,7 +516,8 @@ end
 ]]--
 function Entity:moveX(pixels)
   validate.typeNumber(pixels, "pixels")
-  self:setX(self._x + pixels)
+  self:_setX(self._x + pixels)
+  self:_updateColliders()
 end
 
 --[[
@@ -465,15 +525,19 @@ end
 ]]--
 function Entity:moveY(pixels)
   validate.typeNumber(pixels, "pixels")
-  self:setY(self._y + pixels)
+  self:_setY(self._y + pixels)
+  self:_updateColliders()
 end
 
 --[[
   Moves the entity's position by a specified amount.
 ]]--
 function Entity:move(pixelsX, pixelsY)
-  self:moveX(pixelsX)
-  self:moveY(pixelsY)
+  validate.typeNumber(pixels, "pixels")
+  validate.typeNumber(pixels, "pixels")
+  self:_setX(self._x + pixels)
+  self:_setY(self._y + pixels)
+  self:_updateColliders()
 end
 
 --[[
@@ -496,13 +560,16 @@ end
 function Entity:setAngle(degrees)
   validate.typeNumber(degrees, "degrees")
   self._angle = degrees % 360
+  self:_updateColliders()
 end
 
 --[[
   Rotates the entity's graphics by a specified amount.
 ]]--
 function Entity:rotate(degrees)
-  self:setAngle(self._angle + degrees)
+  validate.typeNumber(degrees, "degrees")
+  self._angle = (self._angle + degrees) % 360
+  self:_updateColliders()
 end
 
 --[[
@@ -513,11 +580,26 @@ function Entity:getAngle()
 end
 
 --[[
+  Internal function for setting the horizontal scale for the entity's graphics.
+]]--
+function Entity:_setHorizontalScale(scale)
+  self._xScale = math.max(scale, 0)
+end
+
+--[[
+  Internal function for setting the vertical scale for the entity's graphics.
+]]--
+function Entity:_setVerticalScale(scale)
+  self._yScale = math.max(scale, 0)
+end
+
+--[[
   Sets the horizontal scale for the entity's graphics.
 ]]--
 function Entity:setHorizontalScale(scale)
   validate.typeNumber(scale, "scale")
-  self._xScale = math.max(scale, 0)
+  self:_setHorizontalScale(scale)
+  self:_updateColliders()
 end
 
 --[[
@@ -525,15 +607,19 @@ end
 ]]--
 function Entity:setVerticalScale(scale)
   validate.typeNumber(scale, "scale")
-  self._yScale = math.max(scale, 0)
+  self:_setVerticalScale(scale)
+  self:_updateColliders()
 end
 
 --[[
   Sets the scale for the entity's graphics.
 ]]--
 function Entity:setScale(scaleX, scaleY)
-  self:setHorizontalScale(scaleX)
-  self:setVerticalScale(scaleY)
+  validate.typeNumber(scaleX, "scaleX")
+  validate.typeNumber(scaleY, "scaleY")
+  self:_setHorizontalScale(scaleX)
+  self:_setVerticalScale(scaleY)
+  self:_updateColliders()
 end
 
 --[[
@@ -541,7 +627,8 @@ end
 ]]--
 function Entity:scaleHorizontally(scale)
   validate.typeNumber(scale, "scale")
-  self:setHorizontalScale(self._xScale + scale)
+  self:_setHorizontalScale(self._xScale + scale)
+  self:_updateColliders()
 end
 
 --[[
@@ -549,15 +636,19 @@ end
 ]]--
 function Entity:scaleVertically(scale)
   validate.typeNumber(scale, "scale")
-  self:setVerticalScale(self._yScale + scale)
+  self:_setVerticalScale(self._yScale + scale)
+  self:_updateColliders()
 end
 
 --[[
   Scales the entity's graphics.
 ]]--
 function Entity:scale(scaleX, scaleY)
-  self:scaleHorizontally(scaleX)
-  self:scaleVertically(scaleY)
+  validate.typeNumber(scaleX, "scaleX")
+  validate.typeNumber(scaleY, "scaleY")
+  self:_setHorizontalScale(self._xScale + scaleX)
+  self:_setVerticalScale(self._yScale + scaleY)
+  self:_updateColliders()
 end
 
 --[[

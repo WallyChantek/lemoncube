@@ -246,6 +246,17 @@ end
 
 
 -- Math Extensions -------------------------------------------------------------
+function math.average(...)
+  local values = {...}
+  local total = 0
+  
+  for i, value in pairs(values) do
+    total = total + value
+  end
+  
+  return total / util.size(values)
+end
+
 --[[
   Forces a number to be within a certain range. EXT: Inclusive, use terms like "boundaries"
 ]]--
