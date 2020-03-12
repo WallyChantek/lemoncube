@@ -22,8 +22,8 @@ end
 function Room:updateRoom()
   -- Update entities
   for k, v in pairs(self) do
-    if type(v) ~= Type.FUNCTION and v.isEntity then
-      v:animate()
+    if type(v) ~= Type.FUNCTION and v._isEntity then
+      v:_animate()
     end
   end
 
@@ -37,8 +37,8 @@ end
 function Room:drawRoom()
   -- Draw entities
   for k, v in pairs(self) do
-    if type(v) ~= Type.FUNCTION and v.isEntity then
-      v:draw()
+    if type(v) ~= Type.FUNCTION and v._isEntity then
+      v:_draw()
     end
   end
 

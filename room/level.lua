@@ -33,7 +33,7 @@ function level:load(prevRoom)
     offsetY = -34
   })
   self.player:addAnimation("flash", self.imgPlayerFlash, 18, 34, {
-    duration = 20,
+    frameDuration = 20,
     shouldLoop = true,
     direction = Option.ANIM_NORMAL,
     offsetX = -7,
@@ -57,6 +57,7 @@ function level:load(prevRoom)
   })
   self.player:changeAnimation("flash")
   self.player:setScale(2, 2)
+  self.player:setAnimationFrameDuration(60)
 end
 
 function level:update()

@@ -13,7 +13,7 @@ function Entity:new(x, y)
   validate.typeNumber(y, "y")
 
   -- Marker indicating this is an entity (used in room cleanup)
-  o.isEntity = true
+  o._isEntity = true
 
   -- Object's position
   o._x = x
@@ -23,14 +23,15 @@ function Entity:new(x, y)
   o._colliders = {}
   
   -- Object's graphical/animation data
-  o._rgba = { r = 1, g = 1, b = 1, a = 1 }
+  o._colorMix = { r = 1, g = 1, b = 1, a = 1 }
   o._animations = {}
-  o._currentAnimation = ""
-  o._rotation = 0
-  o._flipX = 1
-  o._flipY = 1
-  o._scaleX = 1
-  o._scaleY = 1
+  o._activeAnimation = ""
+  o._angle = 0
+  o._horizontalFlip = 1
+  o._verticalFlip = 1
+  o._xScale = 1
+  o._yScale = 1
+  o._isVisible = true
 
   return o
 end
@@ -38,12 +39,15 @@ end
 --[[
   Displays the entity's graphics.
 ]]--
-function Entity:draw(originSize)
+function Entity:_draw(originSize)
   -- Draw current graphic
-  love.graphics.setColor(self._rgba.r, self._rgba.g, self._rgba.b, self._rgba.a)
-  self._animations[self._currentAnimation]:draw(self._x, self._y,
-    math.rad(self._rotation), self._flipX * self._scaleX,
-    self._flipY * self._scaleY)
+  if self._isVisible and self._colorMix.a > 0 then
+    love.graphics.setColor(self._colorMix.r, self._colorMix.g, self._colorMix.b,
+      self._colorMix.a)
+    self._animations[self._activeAnimation]:draw(self._x, self._y,
+      math.rad(self._angle), self._horizontalFlip * self._xScale,
+      self._verticalFlip * self._yScale)
+  end
   
   -- Draw collider(s)
   if (Engine.debugOptions.showColliders) then
@@ -80,16 +84,41 @@ end
 
 -- Graphics --------------------------------------------------------------------
 --[[
+  Makes the entity visible.
+]]--
+function Entity:show()
+  self._isVisible = true
+end
+
+--[[
+  Makes the entity invisible.
+]]--
+function Entity:hide()
+  self._isVisible = false
+end
+
+--[[
   Sets the color influence for the entity's graphics.
 ]]--
-function Entity:setColorTint(r, g, b)
+function Entity:setColorMix(r, g, b)
   validate.typeNumber(r, "r")
   validate.typeNumber(g, "g")
   validate.typeNumber(b, "b")
   
-  self._rgba.r = math.clamp(r, 0, 1)
-  self._rgba.g = math.clamp(g, 0, 1)
-  self._rgba.b = math.clamp(b, 0, 1)
+  self._colorMix.r = math.clamp(r, 0, 1)
+  self._colorMix.g = math.clamp(g, 0, 1)
+  self._colorMix.b = math.clamp(b, 0, 1)
+end
+
+--[[
+  Returns the color influence for the entity's graphics.
+]]--
+function Entity:getColorMix()
+  return {
+    self._colorMix.r,
+    self._colorMix.g,
+    self._colorMix.b
+  }
 end
 
 --[[
@@ -98,21 +127,14 @@ end
 function Entity:setTransparency(a)
   validate.typeNumber(a, "a")
   
-  self._rgba.a = math.clamp(a, 0, 1)
+  self._colorMix.a = math.clamp(a, 0, 1)
 end
 
 --[[
-  Returns the horizontal-flipped state for the entity.
+  Returns the alpha/semi-transparency for the entity's graphics.
 ]]--
-function Entity:getHorizontalDirection()
-  return util.numberToBoolean(1 - self._flipX)
-end
-
---[[
-  Returns the vertical-flipped state for the entity.
-]]--
-function Entity:getVerticalDirection()
-  return util.numberToBoolean(1 - self._flipY)
+function Entity:getTransparency()
+  return self._colorMix.a
 end
 
 --[[
@@ -120,10 +142,14 @@ end
 ]]--
 function Entity:flipHorizontally(isFlipped)
   if type(isFlipped) == Type.NIL then
-    self._flipX = self._flipX - (self._flipX * 2)
+    self._horizontalFlip = self._horizontalFlip - (self._horizontalFlip * 2)
   else
     validate.typeBoolean(isFlipped, "isFlipped")
-    if isFlipped then self._flipX = -1 else self._flipX = 1 end
+    if isFlipped then
+      self._horizontalFlip = -1
+    else
+      self._horizontalFlip = 1
+    end
   end
 end
 
@@ -132,11 +158,29 @@ end
 ]]--
 function Entity:flipVertically(isFlipped)
   if type(isFlipped) == Type.NIL then
-    self._flipY = self._flipY - (self._flipY * 2)
+    self._verticalFlip = self._verticalFlip - (self._verticalFlip * 2)
   else
     validate.typeBoolean(isFlipped, "isFlipped")
-    if isFlipped then self._flipY = -1 else self._flipY = 1 end
+    if isFlipped then
+      self._verticalFlip = -1
+    else
+      self._verticalFlip = 1
+    end
   end
+end
+
+--[[
+  Returns the horizontal-flipped state for the entity.
+]]--
+function Entity:isFlippedHorizontally()
+  return util.numberToBoolean(1 - self._horizontalFlip)
+end
+
+--[[
+  Returns the vertical-flipped state for the entity.
+]]--
+function Entity:isFlippedVertically()
+  return util.numberToBoolean(1 - self._verticalFlip)
 end
 
 
@@ -144,73 +188,108 @@ end
 --[[
   Processes the entity currently-active animation.
 ]]--
-function Entity:animate()
-  self._animations[self._currentAnimation]:animate()
+function Entity:_animate()
+  self._animations[self._activeAnimation]:animate()
 end
 
 --[[
   Adds an animation to the entity.
 ]]--
-function Entity:addAnimation(animationId, image, width, height, options)
-  validate.typeString(animationId, "animationId")
+function Entity:addAnimation(animationName, image, width, height, options)
+  validate.typeString(animationName, "animationName")
   
-  self._animations[animationId] = Animation:new(image, width, height, options)
+  self._animations[animationName] = Animation:new(image, width, height, options)
   
-  if self._currentAnimation == "" then
-    self._currentAnimation = animationId
+  if self._activeAnimation == "" then
+    self._activeAnimation = animationName
   end
 end
 
 --[[
   Changes the current animation.
 ]]--
-function Entity:changeAnimation(animationId)
-  validate.typeString(animationId, "animationId")
+function Entity:changeAnimation(animationName)
+  validate.typeString(animationName, "animationName")
   
-  self._currentAnimation = animationId
-  self._animations[self._currentAnimation]:restart()
+  self._activeAnimation = animationName
+  self._animations[self._activeAnimation]:restart()
 end
 
 --[[
-  Pauses the current animation.
+  Pauses or resumes the current animation.
 ]]--
-function Entity:pauseAnimation()
-  self._animations[self._currentAnimation]:pause()
+function Entity:pauseAnimation(isPaused)
+  isPaused = isPaused or not self._animations[self._activeAnimation]:isPaused()
+  validate.typeBoolean(isPaused, "isPaused")
+  
+  if isPaused then
+    self._animations[self._activeAnimation]:pause()
+  else
+    self._animations[self._activeAnimation]:resume()
+  end
 end
 
 --[[
-  Resumes the current animation.
+  Restarts the current animation.
 ]]--
-function Entity:resumeAnimation()
-  self._animations[self._currentAnimation]:resume()
+function Entity:restartAnimation()
+  self._animations[self._activeAnimation]:restart()
 end
 
 --[[
-  Gets the current animation's ID.
+  Sets the frame duration of the current animation.
 ]]--
-function Entity:getCurrentAnimationId()
-  return self._currentAnimation
+function Entity:setAnimationFrameDuration(newDuration)
+  self._animations[self._activeAnimation]:setFrameDuration(newDuration)
 end
 
 --[[
-  Returns the X-coordinate position of the animation's current action point.
+  Returns the current animation's name.
 ]]--
-function Entity:getActionPointX(actionPointId)
-  if type(self._animations[self._currentAnimation]) ~= Type.NIL then
-    return self._animations[self._currentAnimation]:getActionPointX(
-      actionPointId)
+function Entity:getAnimationName()
+  return self._activeAnimation
+end
+
+--[[
+  Returns the current frame number of the animation.
+]]--
+function Entity:getAnimationFrame()
+  return self._animations[self._activeAnimation]:getCurrentFrame()
+end
+
+--[[
+  Returns whether the animation is paused or playing.
+]]--
+function Entity:isAnimationPaused()
+  return self._animations[self._activeAnimation]:isPaused()
+end
+
+--[[
+  Returns whether the animation has reached the end of its cycle.
+]]--
+function Entity:isAnimationDone()
+  return self._animations[self._activeAnimation]:isDone()
+end
+
+--[[
+  Returns the X-coordinate position of one of the animation's action points.
+]]--
+function Entity:getActionPointX(actionPointName)
+  if type(self._animations[self._activeAnimation]) ~= Type.NIL then
+    return self._animations[self._activeAnimation]:getActionPointX(
+      actionPointName)
   else
     return 0
   end
 end
 
 --[[
-  Returns the Y-coordinate position of the animation's current action point.
+  Returns the Y-coordinate position of one of the animation's action points.
 ]]--
-function Entity:getActionPointY(actionPointId)
-  if type(self._animations[self._currentAnimation]) ~= Type.NIL then
-    return self._animations[self._currentAnimation]:getActionPointY(
-      actionPointId)
+function Entity:getActionPointY(actionPointName)
+  if type(self._animations[self._activeAnimation]) ~= Type.NIL then
+    return self._animations[self._activeAnimation]:getActionPointY(
+      actionPointName)
   else
     return 0
   end
@@ -221,11 +300,11 @@ end
 --[[
   Adds a new collider to the entity.
 ]]--
-function Entity:addCollider(colliderId, options)
+function Entity:addCollider(colliderName, options)
   
   -- Check arguments
   options = options or {}
-  validate.typeString(colliderId, "colliderId")
+  validate.typeString(colliderName, "colliderName")
   validate.typeTable(options, "options")
   
   -- Validate option names
@@ -277,24 +356,24 @@ function Entity:addCollider(colliderId, options)
   validate.atLeast(collider.height, "height", 1)
   
   -- Add to entity's list of colliders
-  self._colliders[colliderId] = collider
-end
-
---[[
-  Retrieves a collider by its ID.
-]]--
-function Entity:getCollider(colliderId)
-  validate.typeString(colliderId, "colliderId")
-  self:_updateColliders()
-  return self._colliders[colliderId]
+  self._colliders[colliderName] = collider
 end
 
 --[[
   Removes an existing collider from the entity.
 ]]--
-function Entity:removeCollider(colliderId)
-  validate.typeString(colliderId, "colliderId")
-  self._colliders[colliderId] = nil
+function Entity:removeCollider(colliderName)
+  validate.typeString(colliderName, "colliderName")
+  self._colliders[colliderName] = nil
+end
+
+--[[
+  Retrieves a collider by its name.
+]]--
+function Entity:getCollider(colliderName)
+  validate.typeString(colliderName, "colliderName")
+  self:_updateColliders()
+  return self._colliders[colliderName]
 end
 
 --[[
@@ -303,11 +382,11 @@ end
 function Entity:_updateColliders()
   for k, collider in pairs(self._colliders) do
     -- Recalculate object's size relative to entity's scale
-    local r = math.rad(self._rotation)
-    local scaleX = self._scaleX -
-      ((self._scaleX - self._scaleY) * math.abs(math.sin(r)))
-    local scaleY = self._scaleY -
-      ((self._scaleY - self._scaleX) * math.abs(math.sin(r)))
+    local r = math.rad(self._angle)
+    local scaleX = self._xScale -
+      ((self._xScale - self._yScale) * math.abs(math.sin(r)))
+    local scaleY = self._yScale -
+      ((self._yScale - self._xScale) * math.abs(math.sin(r)))
     collider.width = collider.baseWidth * scaleX
     collider.height = collider.baseHeight * scaleY
     
@@ -326,8 +405,8 @@ function Entity:_updateColliders()
     end
     
     -- Apply scaling/flipping transformations
-    offsetX = offsetX * self._scaleX * self._flipX
-    offsetY = offsetY * self._scaleY * self._flipY
+    offsetX = offsetX * self._xScale * self._horizontalFlip
+    offsetY = offsetY * self._yScale * self._verticalFlip
     
     -- Apply rotation transformation
       local rotX = offsetX * math.cos(r) - offsetY * math.sin(r)
@@ -349,20 +428,6 @@ end
 
 
 -- Transformations -------------------------------------------------------------
---[[
-  Returns the entity's X-axis position.
-]]--
-function Entity:getX()
-  return self._x
-end
-
---[[
-  Returns the entity's Y-axis position.
-]]--
-function Entity:getY()
-  return self._y
-end
-
 --[[
   Sets the entity's X-axis position.
 ]]--
@@ -412,31 +477,39 @@ function Entity:move(pixelsX, pixelsY)
 end
 
 --[[
-  Rotates the entity's graphics by a specified amount.
+  Returns the entity's X-axis position.
 ]]--
-function Entity:rotate(degrees)
-  self:setRotation(self._rotation + degrees)
+function Entity:getX()
+  return self._x
+end
+
+--[[
+  Returns the entity's Y-axis position.
+]]--
+function Entity:getY()
+  return self._y
 end
 
 --[[
   Sets the rotation degree for the entity's graphics.
 ]]--
-function Entity:setRotation(degrees)
-  self._rotation = degrees % 360
+function Entity:setAngle(degrees)
+  validate.typeNumber(degrees, "degrees")
+  self._angle = degrees % 360
 end
 
 --[[
-  Gets the horizontal scale for the entity's graphics.
+  Rotates the entity's graphics by a specified amount.
 ]]--
-function Entity:getHorizontalScale()
-  return self._scaleX
+function Entity:rotate(degrees)
+  self:setAngle(self._angle + degrees)
 end
 
 --[[
-  Gets the vertical scale for the entity's graphics.
+  Returns the current rotation degree for the entity's graphics.
 ]]--
-function Entity:getVerticalScale()
-  return self._scaleY
+function Entity:getAngle()
+  return self._angle
 end
 
 --[[
@@ -444,7 +517,7 @@ end
 ]]--
 function Entity:setHorizontalScale(scale)
   validate.typeNumber(scale, "scale")
-  self._scaleX = math.max(scale, 0)
+  self._xScale = math.max(scale, 0)
 end
 
 --[[
@@ -452,7 +525,7 @@ end
 ]]--
 function Entity:setVerticalScale(scale)
   validate.typeNumber(scale, "scale")
-  self._scaleY = math.max(scale, 0)
+  self._yScale = math.max(scale, 0)
 end
 
 --[[
@@ -468,7 +541,7 @@ end
 ]]--
 function Entity:scaleHorizontally(scale)
   validate.typeNumber(scale, "scale")
-  self:setHorizontalScale(self._scaleX + scale)
+  self:setHorizontalScale(self._xScale + scale)
 end
 
 --[[
@@ -476,7 +549,7 @@ end
 ]]--
 function Entity:scaleVertically(scale)
   validate.typeNumber(scale, "scale")
-  self:setVerticalScale(self._scaleY + scale)
+  self:setVerticalScale(self._yScale + scale)
 end
 
 --[[
@@ -485,4 +558,18 @@ end
 function Entity:scale(scaleX, scaleY)
   self:scaleHorizontally(scaleX)
   self:scaleVertically(scaleY)
+end
+
+--[[
+  Gets the horizontal scale for the entity's graphics.
+]]--
+function Entity:getHorizontalScale()
+  return self._xScale
+end
+
+--[[
+  Gets the vertical scale for the entity's graphics.
+]]--
+function Entity:getVerticalScale()
+  return self._yScale
 end

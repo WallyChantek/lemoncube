@@ -1,16 +1,5 @@
 -- Current To-do List ----------------------------------------------------------
 -- High priority
-[x] Make IDs only accept numbers or strings (animations, colliders, inputs, etc)
-[/] Test the hell out of everything and fix stuff
-  [ ] Animation
-  [/] Entity
-    [x] Collider transformations
-    [x] Colliders properly aligning with rotated action points
-    [x] Circular colliders
-    [x] Multiple action points
-      - Make it so you have to specify all action points for all animations
-    [ ] Clean up / clarify animation functions (pause/play/etc) (for animations
-        too)
 [ ] Engine
   [ ] Collisions
 [ ] Review TODOs

@@ -16,6 +16,9 @@ end
   Verifies that a value is of a specified type.
 ]]--
 function validate._type(val, varType, varName, msg)
+  assert(type(varName) == Type.STRING,
+    "Validation functions require a variable name, passed as a string")
+  
   assert(type(val) == varType,
     "\""..varName.."\""..validate._msg(
       " must be of type: "..varType,

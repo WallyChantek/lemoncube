@@ -17,7 +17,7 @@ function Animation:new(image, width, height, options)
   
   -- Validate option names
   validate.optionNames(options, {
-    "duration",
+    "frameDuration",
     "shouldLoop",
     "cycles",
     "loopPoint",
@@ -28,7 +28,7 @@ function Animation:new(image, width, height, options)
   })
   
   -- Set option defaults
-  o._duration = options.duration or 10
+  o._frameDuration = options.frameDuration or 10
   o._shouldLoop = options.shouldLoop or false
   o._cycles = options.cycles or 1
   o._loopPoint = options.loopPoint or 1
@@ -42,7 +42,7 @@ function Animation:new(image, width, height, options)
   
   -- Check option types
   local direction = options.direction or 0
-  validate.typeNumber(o._duration, "duration")
+  validate.typeNumber(o._frameDuration, "frameDuration")
   validate.typeBoolean(o._shouldLoop, "shouldLoop")
   validate.typeNumber(o._cycles, "cycles")
   validate.typeNumber(o._loopPoint, "loopPoint")
@@ -54,7 +54,7 @@ function Animation:new(image, width, height, options)
   -- Check option data
   validate.atLeast(width, "width", 1)
   validate.atLeast(height, "height", 1)
-  validate.atLeast(o._duration, "duration", 1)
+  validate.atLeast(o._frameDuration, "frameDuration", 1)
   validate.atLeast(o._cycles, "cycles", 1)
   validate.atLeast(o._loopPoint, "loopPoint", 1)
   validate.constant(direction, "direction", {
@@ -66,7 +66,7 @@ function Animation:new(image, width, height, options)
   
   -- Internal values needed for animation processing
   o._currentFrame = 1
-  o._frameTimer = o._duration
+  o._frameTimer = o._frameDuration
   o._remainingCycles = o._cycles
   o._paused = false
   
@@ -139,7 +139,7 @@ function Animation:animate()
   -- Animate
   if self._frameTimer <= 0 then
     self._currentFrame = self._currentFrame + 1
-    self._frameTimer = self._duration
+    self._frameTimer = self._frameDuration
   end
   self._frameTimer = self._frameTimer - 1
   
@@ -177,34 +177,10 @@ function Animation:draw(x, y, rotation, scaleX, scaleY)
 end
 
 --[[
-  Returns the current frame number of the animation.
---]]
-function Animation:getCurrentFrame()
-  return self._currentFrame
-end
-
---[[
-  Returns whether the animation is currently animating, or if it's reached the
-  end of its cycle. EXT: Looped animations will always return true.
-]]--
-function Animation:hasFinished()
-  return self._remainingCycles ~= 0
-end
-
---[[
   Freezes an active animation.
 ]]--
 function Animation:pause()
   self._paused = true
-end
-
---[[
-  Restarts the animation from the beginning of its cycles.
-]]--
-function Animation:restart()
-  self._currentFrame = 1
-  self._frameTimer = self._duration
-  self._remainingCycles = self._cycles
 end
 
 --[[
@@ -215,11 +191,51 @@ function Animation:resume()
 end
 
 --[[
+  Restarts the animation from the beginning of its cycles.
+]]--
+function Animation:restart()
+  self._currentFrame = 1
+  self._frameTimer = self._frameDuration
+  self._remainingCycles = self._cycles
+end
+
+--[[
+  Sets the frame duration of the animation.
+]]--
+function Animation:setFrameDuration(frameDuration)
+  validate.typeNumber(frameDuration, "frameDuration")
+  self._frameTimer = self._frameTimer - (self._frameDuration - frameDuration)
+  self._frameDuration = frameDuration
+end
+
+--[[
+  Returns the current frame number of the animation.
+--]]
+function Animation:getCurrentFrame()
+  return self._currentFrame
+end
+
+--[[
+  Returns whether the animation is paused or playing.
+]]--
+function Animation:isPaused()
+  return self._paused
+end
+
+--[[
+  Returns whether the animation is currently animating, or if it's reached the
+  end of its cycle. EXT: Looped animations will always return true.
+]]--
+function Animation:isDone()
+  return self._remainingCycles == 0
+end
+
+--[[
   Returns the X-coordinate position of the current frame's action point.
 ]]--
-function Animation:getActionPointX(actionPointId)
-  if type(self._actionPoints[actionPointId]) ~= Type.NIL then
-    return self._actionPoints[actionPointId][self._currentFrame].x
+function Animation:getActionPointX(actionPointName)
+  if type(self._actionPoints[actionPointName]) ~= Type.NIL then
+    return self._actionPoints[actionPointName][self._currentFrame].x
   else
     return 0
   end
@@ -228,9 +244,9 @@ end
 --[[
   Returns the Y-coordinate position of the current frame's action point.
 ]]--
-function Animation:getActionPointY(actionPointId)
-  if type(self._actionPoints[actionPointId]) ~= Type.NIL then
-    return self._actionPoints[actionPointId][self._currentFrame].y
+function Animation:getActionPointY(actionPointName)
+  if type(self._actionPoints[actionPointName]) ~= Type.NIL then
+    return self._actionPoints[actionPointName][self._currentFrame].y
   else
     return 0
   end
