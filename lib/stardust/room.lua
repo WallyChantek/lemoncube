@@ -9,7 +9,7 @@ function Room:new(roomName)
   setmetatable(o, Room)
 
   roomName = roomName or "(untitled)"
-  validate.typeString(roomName, "roomName")
+  Validate.typeString(roomName, "roomName")
 
   o._roomName = roomName
 

@@ -15,7 +15,7 @@ end
   Displays the debugger information.
 ]]--
 function Debugger:draw()
-  if not Engine.debugOptions.showOverlay then return end
+  if not Engine.debugConfig.showOverlay then return end
 
   -- Display which gamestate is active
   love.graphics.setColor(1, 1, 1)

@@ -9,8 +9,8 @@ function Entity:new(x, y)
   setmetatable(o, Entity)
   
   -- Check arguments
-  validate.typeNumber(x, "x")
-  validate.typeNumber(y, "y")
+  Validate.typeNumber(x, "x")
+  Validate.typeNumber(y, "y")
 
   -- Marker indicating this is an entity (used in room cleanup)
   o._isEntity = true
@@ -52,9 +52,9 @@ function Entity:_draw(originSize)
   end
   
   -- Draw collider(s)
-  if (Engine.debugOptions.showColliders) then
+  if (Engine.debugConfig.showColliders) then
     for k, collider in pairs(self._colliders) do
-      if Engine.debugOptions.highlightCollisions and collider.isColliding then
+      if Engine.debugConfig.highlightCollisions and collider.isColliding then
         love.graphics.setColor(0, 1, 0, 0.5)
       else
         love.graphics.setColor(1, 0, 0, 0.5)
@@ -70,15 +70,15 @@ function Entity:_draw(originSize)
   end
 
   -- Draw origin point
-  if Engine.debugOptions.originCrosshairRadius > 0 then
-    local orgOut = Engine.debugOptions.originCrosshairRadius +
-      (Engine.debugOptions.originCrosshairRadius / 2)
-    local orgIn = orgOut - Engine.debugOptions.originCrosshairRadius
+  if Engine.debugConfig.originCrosshairRadius > 0 then
+    local orgOut = Engine.debugConfig.originCrosshairRadius +
+      (Engine.debugConfig.originCrosshairRadius / 2)
+    local orgIn = orgOut - Engine.debugConfig.originCrosshairRadius
     love.graphics.setColor(0, 1, 0, 1)
     love.graphics.points(self._x, self._y)
     love.graphics.ellipse("line", self._x, self._y,
-      Engine.debugOptions.originCrosshairRadius,
-      Engine.debugOptions.originCrosshairRadius)
+      Engine.debugConfig.originCrosshairRadius,
+      Engine.debugConfig.originCrosshairRadius)
     love.graphics.line(self._x - orgIn, self._y, self._x - orgOut, self._y)
     love.graphics.line(self._x + orgIn, self._y, self._x + orgOut, self._y)
     love.graphics.line(self._x, self._y - orgIn, self._x, self._y - orgOut)
@@ -106,9 +106,9 @@ end
   Sets the color influence for the entity's graphics.
 ]]--
 function Entity:setColorMix(r, g, b)
-  validate.typeNumber(r, "r")
-  validate.typeNumber(g, "g")
-  validate.typeNumber(b, "b")
+  Validate.typeNumber(r, "r")
+  Validate.typeNumber(g, "g")
+  Validate.typeNumber(b, "b")
   
   self._colorMix.r = math.clamp(r, 0, 1)
   self._colorMix.g = math.clamp(g, 0, 1)
@@ -130,7 +130,7 @@ end
   Sets the alpha/semi-transparency for the entity's graphics.
 ]]--
 function Entity:setTransparency(a)
-  validate.typeNumber(a, "a")
+  Validate.typeNumber(a, "a")
   
   self._colorMix.a = math.clamp(a, 0, 1)
 end
@@ -149,7 +149,7 @@ function Entity:flipHorizontally(isFlipped)
   if type(isFlipped) == Type.NIL then
     self._horizontalFlip = self._horizontalFlip - (self._horizontalFlip * 2)
   else
-    validate.typeBoolean(isFlipped, "isFlipped")
+    Validate.typeBoolean(isFlipped, "isFlipped")
     if isFlipped then
       self._horizontalFlip = -1
     else
@@ -165,7 +165,7 @@ function Entity:flipVertically(isFlipped)
   if type(isFlipped) == Type.NIL then
     self._verticalFlip = self._verticalFlip - (self._verticalFlip * 2)
   else
-    validate.typeBoolean(isFlipped, "isFlipped")
+    Validate.typeBoolean(isFlipped, "isFlipped")
     if isFlipped then
       self._verticalFlip = -1
     else
@@ -178,14 +178,14 @@ end
   Returns the horizontal-flipped state for the entity.
 ]]--
 function Entity:isFlippedHorizontally()
-  return util.numberToBoolean(1 - self._horizontalFlip)
+  return Util.numberToBoolean(1 - self._horizontalFlip)
 end
 
 --[[
   Returns the vertical-flipped state for the entity.
 ]]--
 function Entity:isFlippedVertically()
-  return util.numberToBoolean(1 - self._verticalFlip)
+  return Util.numberToBoolean(1 - self._verticalFlip)
 end
 
 
@@ -203,7 +203,7 @@ end
   Adds an animation to the entity.
 ]]--
 function Entity:addAnimation(animationName, image, width, height, options)
-  validate.typeString(animationName, "animationName")
+  Validate.typeString(animationName, "animationName")
   
   self._animations[animationName] = Animation:new(image, width, height, options)
   
@@ -216,7 +216,7 @@ end
   Changes the current animation.
 ]]--
 function Entity:changeAnimation(animationName)
-  validate.typeString(animationName, "animationName")
+  Validate.typeString(animationName, "animationName")
   
   self._activeAnimation = animationName
   self._animations[self._activeAnimation]:restart()
@@ -227,7 +227,7 @@ end
 ]]--
 function Entity:pauseAnimation(isPaused)
   isPaused = isPaused or not self._animations[self._activeAnimation]:isPaused()
-  validate.typeBoolean(isPaused, "isPaused")
+  Validate.typeBoolean(isPaused, "isPaused")
   
   if isPaused then
     self._animations[self._activeAnimation]:pause()
@@ -310,11 +310,11 @@ end
 function Entity:addCollider(colliderName, options)
   -- Check arguments
   options = options or {}
-  validate.typeString(colliderName, "colliderName")
-  validate.typeTable(options, "options")
+  Validate.typeString(colliderName, "colliderName")
+  Validate.typeTable(options, "options")
   
   -- Validate option names
-  validate.optionNames(options, {
+  Validate.optionNames(options, {
     "shape",
     "width",
     "height",
@@ -344,26 +344,26 @@ function Entity:addCollider(colliderName, options)
   collider.isColliding = false
   
   -- Check option types
-  validate.typeNumber(collider.shape, "shape")
-  validate.typeNumber(collider.width, "width")
-  validate.typeNumber(collider.height, "height")
-  validate.typeNumber(collider.offsetX, "offsetX")
-  validate.typeNumber(collider.offsetY, "offsetY")
-  validate.constant(collider.relativity, "relativity", {
+  Validate.typeNumber(collider.shape, "shape")
+  Validate.typeNumber(collider.width, "width")
+  Validate.typeNumber(collider.height, "height")
+  Validate.typeNumber(collider.offsetX, "offsetX")
+  Validate.typeNumber(collider.offsetY, "offsetY")
+  Validate.constant(collider.relativity, "relativity", {
     Option.RELATIVE_ORIGIN_POINT,
     Option.RELATIVE_ACTION_POINT
   })
   if collider.relativity == Option.RELATIVE_ACTION_POINT then
-    validate.typeString(collider.relativeActionPoint, "relativeActionPoint")
+    Validate.typeString(collider.relativeActionPoint, "relativeActionPoint")
   end
 
   -- Check option values
-  validate.constant(collider.shape, "shape", {
+  Validate.constant(collider.shape, "shape", {
     Option.RECTANGLE,
     Option.CIRCLE
   })
-  validate.atLeast(collider.width, "width", 1)
-  validate.atLeast(collider.height, "height", 1)
+  Validate.atLeast(collider.width, "width", 1)
+  Validate.atLeast(collider.height, "height", 1)
   if collider.shape == Option.RECTANGLE then
     if type(options.radius) ~= Type.NIL then
       error("Cannot use option \"radius\" with shape \"rectangle\"")
@@ -387,7 +387,7 @@ end
   Removes an existing collider from the entity.
 ]]--
 function Entity:removeCollider(colliderName)
-  validate.typeString(colliderName, "colliderName")
+  Validate.typeString(colliderName, "colliderName")
   self._colliders[colliderName] = nil
 end
 
@@ -395,7 +395,7 @@ end
   Retrieves a collider by its name.
 ]]--
 function Entity:getCollider(colliderName)
-  validate.typeString(colliderName, "colliderName")
+  Validate.typeString(colliderName, "colliderName")
   return self._colliders[colliderName]
 end
 
@@ -486,7 +486,7 @@ end
   Sets the entity's X-axis position.
 ]]--
 function Entity:setX(x)
-validate.typeNumber(x, "x")
+Validate.typeNumber(x, "x")
   self:_setX(x)
   self:_updateColliders()
 end
@@ -495,7 +495,7 @@ end
   Sets the entity's Y-axis position.
 ]]--
 function Entity:setY(y)
-  validate.typeNumber(y, "y")
+  Validate.typeNumber(y, "y")
   self:_setY(y)
   self:_updateColliders()
 end
@@ -504,8 +504,8 @@ end
   Sets the entity's X & Y positions.
 ]]--
 function Entity:setPosition(x, y)
-  validate.typeNumber(x, "x")
-  validate.typeNumber(y, "y")
+  Validate.typeNumber(x, "x")
+  Validate.typeNumber(y, "y")
   self:_setX(x)
   self:_setY(y)
   self:_updateColliders()
@@ -515,7 +515,7 @@ end
   Moves the entity's position horizontally by a specified amount.
 ]]--
 function Entity:moveX(pixels)
-  validate.typeNumber(pixels, "pixels")
+  Validate.typeNumber(pixels, "pixels")
   self:_setX(self._x + pixels)
   self:_updateColliders()
 end
@@ -524,7 +524,7 @@ end
   Moves the entity's position vertically by a specified amount.
 ]]--
 function Entity:moveY(pixels)
-  validate.typeNumber(pixels, "pixels")
+  Validate.typeNumber(pixels, "pixels")
   self:_setY(self._y + pixels)
   self:_updateColliders()
 end
@@ -533,8 +533,8 @@ end
   Moves the entity's position by a specified amount.
 ]]--
 function Entity:move(pixelsX, pixelsY)
-  validate.typeNumber(pixels, "pixels")
-  validate.typeNumber(pixels, "pixels")
+  Validate.typeNumber(pixels, "pixels")
+  Validate.typeNumber(pixels, "pixels")
   self:_setX(self._x + pixels)
   self:_setY(self._y + pixels)
   self:_updateColliders()
@@ -558,7 +558,7 @@ end
   Sets the rotation degree for the entity's graphics.
 ]]--
 function Entity:setAngle(degrees)
-  validate.typeNumber(degrees, "degrees")
+  Validate.typeNumber(degrees, "degrees")
   self._angle = degrees % 360
   self:_updateColliders()
 end
@@ -567,7 +567,7 @@ end
   Rotates the entity's graphics by a specified amount.
 ]]--
 function Entity:rotate(degrees)
-  validate.typeNumber(degrees, "degrees")
+  Validate.typeNumber(degrees, "degrees")
   self._angle = (self._angle + degrees) % 360
   self:_updateColliders()
 end
@@ -597,7 +597,7 @@ end
   Sets the horizontal scale for the entity's graphics.
 ]]--
 function Entity:setHorizontalScale(scale)
-  validate.typeNumber(scale, "scale")
+  Validate.typeNumber(scale, "scale")
   self:_setHorizontalScale(scale)
   self:_updateColliders()
 end
@@ -606,7 +606,7 @@ end
   Sets the vertical scale for the entity's graphics.
 ]]--
 function Entity:setVerticalScale(scale)
-  validate.typeNumber(scale, "scale")
+  Validate.typeNumber(scale, "scale")
   self:_setVerticalScale(scale)
   self:_updateColliders()
 end
@@ -615,8 +615,8 @@ end
   Sets the scale for the entity's graphics.
 ]]--
 function Entity:setScale(scaleX, scaleY)
-  validate.typeNumber(scaleX, "scaleX")
-  validate.typeNumber(scaleY, "scaleY")
+  Validate.typeNumber(scaleX, "scaleX")
+  Validate.typeNumber(scaleY, "scaleY")
   self:_setHorizontalScale(scaleX)
   self:_setVerticalScale(scaleY)
   self:_updateColliders()
@@ -626,7 +626,7 @@ end
   Scales the entity's graphics horizontally.
 ]]--
 function Entity:scaleHorizontally(scale)
-  validate.typeNumber(scale, "scale")
+  Validate.typeNumber(scale, "scale")
   self:_setHorizontalScale(self._xScale + scale)
   self:_updateColliders()
 end
@@ -635,7 +635,7 @@ end
   Scales the entity's graphics vertically.
 ]]--
 function Entity:scaleVertically(scale)
-  validate.typeNumber(scale, "scale")
+  Validate.typeNumber(scale, "scale")
   self:_setVerticalScale(self._yScale + scale)
   self:_updateColliders()
 end
@@ -644,8 +644,8 @@ end
   Scales the entity's graphics.
 ]]--
 function Entity:scale(scaleX, scaleY)
-  validate.typeNumber(scaleX, "scaleX")
-  validate.typeNumber(scaleY, "scaleY")
+  Validate.typeNumber(scaleX, "scaleX")
+  Validate.typeNumber(scaleY, "scaleY")
   self:_setHorizontalScale(self._xScale + scaleX)
   self:_setVerticalScale(self._yScale + scaleY)
   self:_updateColliders()

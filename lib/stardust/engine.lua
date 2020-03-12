@@ -8,7 +8,7 @@ Engine._scaleFactorY = 1
 Engine._inputControllers = {}
 
 -- Debug functionality
-Engine.debugOptions = {}
+Engine.debugConfig = {}
 Engine._debugger = nil
 
 -- FPS limiter
@@ -63,14 +63,14 @@ end
   Fowards a Love event handler down to the currently-active room.
 ]]--
 function Engine:forwardEvent(event, data)
-  validate.typeString(event, "event")
+  Validate.typeString(event, "event")
   
   -- Nothing to forward if active room doesn't have this event
   if type(Engine._currentRoom[event]) == Type.NIL then return end
   
   -- Forward event
   data = data or {}
-  validate.typeTable(data, "data")
+  Validate.typeTable(data, "data")
   Engine._currentRoom[event](Engine._currentRoom, unpack(data))
 end
 
@@ -80,10 +80,10 @@ end
 function Engine:enableDebugMode(options)
   -- Check arguments
   options = options or {}
-  validate.typeTable(options, "options")
+  Validate.typeTable(options, "options")
 
   -- Validate option names
-  validate.optionNames(options, {
+  Validate.optionNames(options, {
     "showOverlay",
     "showColliders",
     "originCrosshairRadius",
@@ -97,17 +97,17 @@ function Engine:enableDebugMode(options)
   options.highlightCollisions = options.highlightCollisions or false
 
   -- Check option types
-  validate.typeBoolean(options.showOverlay, "showOverlay")
-  validate.typeBoolean(options.showColliders, "showColliders")
-  validate.typeNumber(options.originCrosshairRadius, "originCrosshairRadius")
-  validate.typeBoolean(options.highlightCollisions, "highlightCollisions")
+  Validate.typeBoolean(options.showOverlay, "showOverlay")
+  Validate.typeBoolean(options.showColliders, "showColliders")
+  Validate.typeNumber(options.originCrosshairRadius, "originCrosshairRadius")
+  Validate.typeBoolean(options.highlightCollisions, "highlightCollisions")
   
   -- Check option values
-  validate.atLeast(options.originCrosshairRadius, "originCrosshairRadius", 0)
+  Validate.atLeast(options.originCrosshairRadius, "originCrosshairRadius", 0)
 
   -- Create debugger object & save option settings
   Engine._debugger = Debugger:new()
-  Engine.debugOptions = options
+  Engine.debugConfig = options
 end
 
 --[[
@@ -129,7 +129,7 @@ end
   Changes the currently-active game state.
 ]]--
 function Engine:changeRoom(room)
-  validate.typeTable(room, "room")
+  Validate.typeTable(room, "room")
 
   -- Clean up the room we're about to leave
   local prevRoom = nil

@@ -10,13 +10,13 @@ function Animation:new(image, width, height, options)
 
   -- Check arguments
   options = options or {}
-  validate.typeUserdata(image, "image")
-  validate.typeNumber(width, "width")
-  validate.typeNumber(height, "height")
-  validate.typeTable(options, "options")
+  Validate.typeUserdata(image, "image")
+  Validate.typeNumber(width, "width")
+  Validate.typeNumber(height, "height")
+  Validate.typeTable(options, "options")
   
   -- Validate option names
-  validate.optionNames(options, {
+  Validate.optionNames(options, {
     "frameDuration",
     "shouldLoop",
     "cycles",
@@ -42,22 +42,22 @@ function Animation:new(image, width, height, options)
   
   -- Check option types
   local direction = options.direction or 0
-  validate.typeNumber(o._frameDuration, "frameDuration")
-  validate.typeBoolean(o._shouldLoop, "shouldLoop")
-  validate.typeNumber(o._cycles, "cycles")
-  validate.typeNumber(o._loopPoint, "loopPoint")
-  validate.typeNumber(direction, "direction")
-  validate.typeNumber(o._offsetX, "offsetX")
-  validate.typeNumber(o._offsetY, "offsetY")
-  validate.typeTable(o._actionPoints, "actionPoints")
+  Validate.typeNumber(o._frameDuration, "frameDuration")
+  Validate.typeBoolean(o._shouldLoop, "shouldLoop")
+  Validate.typeNumber(o._cycles, "cycles")
+  Validate.typeNumber(o._loopPoint, "loopPoint")
+  Validate.typeNumber(direction, "direction")
+  Validate.typeNumber(o._offsetX, "offsetX")
+  Validate.typeNumber(o._offsetY, "offsetY")
+  Validate.typeTable(o._actionPoints, "actionPoints")
   
   -- Check option data
-  validate.atLeast(width, "width", 1)
-  validate.atLeast(height, "height", 1)
-  validate.atLeast(o._frameDuration, "frameDuration", 1)
-  validate.atLeast(o._cycles, "cycles", 1)
-  validate.atLeast(o._loopPoint, "loopPoint", 1)
-  validate.constant(direction, "direction", {
+  Validate.atLeast(width, "width", 1)
+  Validate.atLeast(height, "height", 1)
+  Validate.atLeast(o._frameDuration, "frameDuration", 1)
+  Validate.atLeast(o._cycles, "cycles", 1)
+  Validate.atLeast(o._loopPoint, "loopPoint", 1)
+  Validate.constant(direction, "direction", {
     Option.ANIM_NORMAL,
     Option.ANIM_REVERSE,
     Option.ANIM_ALTERNATE,
@@ -91,32 +91,32 @@ function Animation:new(image, width, height, options)
   end
 
   -- Validate action point data
-  if util.size(o._actionPoints) > 0 then
+  if Util.size(o._actionPoints) > 0 then
     for apName, apPairs in pairs(o._actionPoints) do
       -- Verify that number of action point pairs is correct
-      validate.equals(util.size(apPairs), "apPairs", util.size(o._quads),
+      Validate.equals(Util.size(apPairs), "apPairs", Util.size(o._quads),
         " must match number of frames in animation")
       
       -- Iterate through each action point pair
       for k, apPair in pairs(apPairs) do
         -- Validate action point pair options
-        validate.optionNames(apPair, {"x", "y"})
+        Validate.optionNames(apPair, {"x", "y"})
         
         -- Validation action point pair types
-        validate.typeNumber(apPair.x, "x")
-        validate.typeNumber(apPair.y, "y")
+        Validate.typeNumber(apPair.x, "x")
+        Validate.typeNumber(apPair.y, "y")
       end
 
       -- Reverse action point data if necessary
       if o._isReversed then
-        util.reverseTable(apPairs)
+        Util.reverseTable(apPairs)
       end
     end
   end
 
   -- Insert additional frames (and action points) if set to alternate
   if o._shouldAlternate then
-    for i = util.size(o._quads) - 1, o._loopPoint + 1, -1 do
+    for i = Util.size(o._quads) - 1, o._loopPoint + 1, -1 do
       table.insert(o._quads, o._quads[i])
       for actionPointName, actionPointPairs in pairs(o._actionPoints) do
         table.insert(actionPointPairs, actionPointPairs[i])
@@ -144,7 +144,7 @@ function Animation:animate()
   self._frameTimer = self._frameTimer - 1
   
   -- Loop (if necessary)
-  if self._currentFrame > util.size(self._quads) then
+  if self._currentFrame > Util.size(self._quads) then
     if self._shouldLoop then
       -- Reset if animation should loop indefinitely
       self._currentFrame = self._loopPoint
@@ -155,7 +155,7 @@ function Animation:animate()
       if self._remainingCycles > 0 or self._shouldAlternate then
         self._currentFrame = self._loopPoint
       else
-        self._currentFrame = util.size(self._quads)
+        self._currentFrame = Util.size(self._quads)
       end
     end
   end
@@ -165,11 +165,11 @@ end
   Displays the current frame of the animation.
 --]]
 function Animation:draw(x, y, rotation, scaleX, scaleY)
-  validate.typeNumber(x, "x")
-  validate.typeNumber(y, "y")
-  validate.typeNumber(rotation, "rotation")
-  validate.typeNumber(scaleX, "scaleX")
-  validate.typeNumber(scaleY, "scaleY")
+  Validate.typeNumber(x, "x")
+  Validate.typeNumber(y, "y")
+  Validate.typeNumber(rotation, "rotation")
+  Validate.typeNumber(scaleX, "scaleX")
+  Validate.typeNumber(scaleY, "scaleY")
   
   love.graphics.draw(self._img, self._quads[self._currentFrame],
     x, y, rotation,
@@ -203,7 +203,7 @@ end
   Sets the frame duration of the animation.
 ]]--
 function Animation:setFrameDuration(frameDuration)
-  validate.typeNumber(frameDuration, "frameDuration")
+  Validate.typeNumber(frameDuration, "frameDuration")
   self._frameTimer = self._frameTimer - (self._frameDuration - frameDuration)
   self._frameDuration = frameDuration
 end

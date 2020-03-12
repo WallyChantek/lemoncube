@@ -41,10 +41,10 @@ end
   Adds a new input or changes an existing input.
 ]]--
 function InputController:setInput(inputId, inputType, input)
-  validate.typeString(inputId, "inputId")
-  validate.typeNumber(inputType, "inputType")
-  validate.typeString(input, "input")
-  validate.constant(inputType, "inputType", {
+  Validate.typeString(inputId, "inputId")
+  Validate.typeNumber(inputType, "inputType")
+  Validate.typeString(input, "input")
+  Validate.constant(inputType, "inputType", {
     Option.INPUT_KB,
     Option.INPUT_JOY_BTN,
     Option.INPUT_JOY_AXIS,
@@ -65,7 +65,7 @@ end
   Removes an existing input.
 ]]--
 function InputController:removeInput(inputId)
-  validate.typeString(inputId, "inputId")
+  Validate.typeString(inputId, "inputId")
   self._inputs[inputId] = nil
 end
 
@@ -73,7 +73,7 @@ end
   Returns whether the target input is currently down/active.
 ]]--
 function InputController:isBeingHeld(inputId)
-  validate.typeString(inputId, "inputId")
+  Validate.typeString(inputId, "inputId")
   
   local input = self._inputs[inputId]
   if (input.inputType == Option.INPUT_KB) then
@@ -87,7 +87,7 @@ end
   Returns whether the target input was pressed down during the current frame.
 ]]--
 function InputController:wasPressed(inputId)
-  validate.typeString(inputId, "inputId")
+  Validate.typeString(inputId, "inputId")
   return self._inputs[inputId].wasPressed
 end
 
@@ -95,7 +95,7 @@ end
   Returns whether the target input was released during the current frame.
 ]]--
 function InputController:wasReleased(inputId)
-  validate.typeString(inputId, "inputId")
+  Validate.typeString(inputId, "inputId")
   return self._inputs[inputId].wasReleased
 end
 

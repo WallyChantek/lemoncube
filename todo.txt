@@ -1,15 +1,10 @@
 -- Current To-do List ----------------------------------------------------------
--- High priority
-[ ] Reconsider names/collections of various constants
-
 -- Normal priority
 [ ] Z-ordering/layering of entities
 [ ] Come up with a name for the framework already
 [ ] Look into canvases
 [ ] Make it so you can push/pop gamestates without having to completely change?
     Like for pause menus and stuff
-[ ] Fully-implement and test the hell out of colliders
-  [ ] Make colliders scale and whatnot
 
 -- Low priority
 [/] Fonts
