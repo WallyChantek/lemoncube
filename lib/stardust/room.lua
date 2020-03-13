@@ -21,12 +21,7 @@ end
 ]]--
 function Room:updateRoom()
   -- Update entities
-  for k, v in pairs(self) do
-    if type(v) ~= Type.FUNCTION and v._isEntity then
-      v:_animate()
-      v:_updateColliders()
-    end
-  end
+  self:updateEntities(self)
 
   -- Call room-specific update function
   if type(self.update) ~= Type.NIL then self:update() end
@@ -37,14 +32,35 @@ end
 ]]--
 function Room:drawRoom()
   -- Draw entities
-  for k, v in pairs(self) do
-    if type(v) ~= Type.FUNCTION and v._isEntity then
-      v:_draw()
-    end
-  end
+  self:drawEntities(self)
 
   -- Call room-specific draw function
   if type(self.draw) ~= Type.NIL then self:draw() end
+end
+
+function Room:drawEntities(t)
+  for k, v in pairs(t) do
+    if type(v) == Type.TABLE then
+      if v._isEntity then
+        v:_draw()
+      else
+        self:drawEntities(v)
+      end
+    end
+  end
+end
+
+function Room:updateEntities(t)
+  for k, v in pairs(t) do
+    if type(v) == Type.TABLE then
+      if v._isEntity then
+        v:_animate()
+        v:_updateColliders()
+      else
+        self:updateEntities(v)
+      end
+    end
+  end
 end
 
 --[[

@@ -4,6 +4,7 @@ function level:load(prevRoom)
   -- Load resources.
   self.imgPlayer = love.graphics.newImage(res.sprite.girlIdle)
   self.imgPlayerFlash = love.graphics.newImage(res.sprite.girlFlash)
+  self.imgBullet = love.graphics.newImage(res.sprite.bullet)
   
   -- Initialize objects.
   self.player = Entity:new(128, 128)
@@ -72,6 +73,8 @@ function level:load(prevRoom)
     shape = Option.CIRCLE,
     radius = 16
   })
+  
+  self.bullets = {}
 end
 
 function level:update()
@@ -87,12 +90,13 @@ function level:update()
     self.player:moveX(self.player.MOVE_SPEED)
   end
 
-  if controllers[1]:wasPressed("fire3") then self.player:flipHorizontally() end
-  if controllers[1]:wasPressed("fire5") then self.player:flipVertically() end
-  if controllers[1]:isBeingHeld("fire1") then self.player:rotate(-1) end
-  if controllers[1]:isBeingHeld("fire6") then self.player:rotate(1) end
-  if controllers[1]:isBeingHeld("fire4") then self.player:scale(0.1, 0.1) end
-  if controllers[1]:isBeingHeld("fire2") then self.player:scale(-0.1, -0.1) end
+  -- if controllers[1]:wasPressed("fire3") then self.player:flipHorizontally() end
+  -- if controllers[1]:wasPressed("fire5") then self.player:flipVertically() end
+  -- if controllers[1]:isBeingHeld("fire1") then self.player:rotate(-1) end
+  -- if controllers[1]:isBeingHeld("fire6") then self.player:rotate(1) end
+  -- if controllers[1]:isBeingHeld("fire4") then self.player:scale(0.1, 0.1) end
+  -- if controllers[1]:isBeingHeld("fire2") then self.player:scale(-0.1, -0.1) end
+  
   -- if controllers[1]:isBeingHeld("fire4") then self.player:scaleHorizontally(0.1) end
   -- if controllers[1]:isBeingHeld("fire2") then self.player:scaleVertically(0.1) end
   
@@ -100,6 +104,29 @@ function level:update()
     Engine:checkCollision(collider, self.goomba1:getCollider("hitbox"))
     Engine:checkCollision(collider, self.goomba2:getCollider("hitbox"))
   end
+  
+  if controllers[1]:isBeingHeld("fire1") then
+    local bullet = Entity:new(self.player:getX(), self.player:getY())
+    bullet:addAnimation("default", self.imgBullet, 7, 7, {
+      offsetX = -3, offsetY = -3
+    })
+    table.insert(self.bullets, bullet)
+  end
+  
+  if controllers[1]:isBeingHeld("fire2") then
+    for i = 0, 100, 1 do
+      local bullet = Entity:new(self.player:getX(), self.player:getY())
+      bullet:addAnimation("default", self.imgBullet, 7, 7, {
+        offsetX = -3, offsetY = -3
+      })
+      table.insert(self.bullets, bullet)
+    end
+  end
+end
+
+function level:draw()
+  love.graphics.setColor(1, 1, 1, 1)
+  love.graphics.print(Util.size(self.bullets), 128, 16)
 end
 
 function level:keypressed(key, scancode, isrepeat)

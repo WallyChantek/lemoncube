@@ -11,9 +11,9 @@ function love.load()
   Engine:setBaseResolution(320, 240)
   Engine:enableDebugMode({
     showOverlay = true,
-    showColliders = true,
-    originCrosshairRadius = 8,
-    highlightCollisions = true
+    -- showColliders = true,
+    -- originCrosshairRadius = 8,
+    -- highlightCollisions = true
   })
 
   path_res_img = "res/img/"
@@ -21,7 +21,7 @@ function love.load()
     sprite = {
       girlIdle = path_res_img .. "girl.png",
       girlFlash = path_res_img .. "girl_flash.png",
-      block = path_res_img .. "block.png"
+      bullet = path_res_img .. "bullet.png"
     },
     music = {
       dummy = "dummy"

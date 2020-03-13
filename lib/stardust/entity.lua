@@ -410,6 +410,8 @@ end
   Updates the collider's position based on its relativity setting.
 ]]--
 function Entity:_updateColliders()
+  if Util.size(self._colliders) == 0 then return end
+  
   local r = math.rad(self._angle)
   local scaleX = self._xScale -
     ((self._xScale - self._yScale) * math.abs(math.sin(r)))
