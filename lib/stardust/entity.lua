@@ -448,10 +448,12 @@ function Entity:_updateColliders()
     offsetY = offsetY * self._yScale * self._verticalFlip
     
     -- Apply rotation transformation
+    if self._angle ~= 0 then
       local rotX = offsetX * math.cos(r) - offsetY * math.sin(r)
       local rotY = offsetX * math.sin(r) + offsetY * math.cos(r)
       offsetX = rotX
       offsetY = rotY
+    end
     
     -- Undo the midpoint repositioning from earlier
     if collider.shape == Option.RECTANGLE then

@@ -105,10 +105,14 @@ function level:update()
     Engine:checkCollision(collider, self.goomba2:getCollider("hitbox"))
   end
   
-  if controllers[1]:isBeingHeld("fire1") then
+  if controllers[1]:wasPressed("fire1") then
     local bullet = Entity:new(self.player:getX(), self.player:getY())
     bullet:addAnimation("default", self.imgBullet, 7, 7, {
       offsetX = -3, offsetY = -3
+    })
+    bullet:addCollider("hitbox", {
+      shape = Option.CIRCLE,
+      radius = 4
     })
     table.insert(self.bullets, bullet)
   end
@@ -118,6 +122,10 @@ function level:update()
       local bullet = Entity:new(self.player:getX(), self.player:getY())
       bullet:addAnimation("default", self.imgBullet, 7, 7, {
         offsetX = -3, offsetY = -3
+      })
+      bullet:addCollider("hitbox", {
+        shape = Option.CIRCLE,
+        radius = 4
       })
       table.insert(self.bullets, bullet)
     end
