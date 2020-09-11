@@ -1,0 +1,5 @@
+- Notes ------------------------------------------------------------------------
+- A Room is simply a collection of objects, including entities. By doing it this
+  way, we can easily just add entities to a room by creating them without
+  having to call a specific entity-collection function. We don't have to work
+  our way through the Engine by doing this, either.

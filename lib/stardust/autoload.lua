@@ -7,7 +7,6 @@ require(pkg .. "constants")
 
 -- Engine System Components ----------------------------------------------------
 require(pkg .. "errorHandler")
-require(pkg .. "debugger")
 
 
 -- Game Engine Core ------------------------------------------------------------

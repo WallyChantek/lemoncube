@@ -1,34 +1,38 @@
-Type = {}
-Option = {}
+Const = {}
+Const.LUA_TYPE = {}
+Const.COLLIDER_SHAPE = {}
+Const.COLLIDER_POSITION = {}
+Const.ANIM_PLAYBACK = {}
+Const.INPUT_SOURCE = {}
 
 -- System ----------------------------------------------------------------------
-Type.NIL = "nil"
-Type.BOOLEAN = "boolean"
-Type.NUMBER = "number"
-Type.STRING = "string"
-Type.USERDATA = "userdata"
-Type.FUNCTION = "function"
-Type.THREAD = "thread"
-Type.TABLE = "table"
+Const.LUA_TYPE.NIL = "nil"
+Const.LUA_TYPE.BOOLEAN = "boolean"
+Const.LUA_TYPE.NUMBER = "number"
+Const.LUA_TYPE.STRING = "string"
+Const.LUA_TYPE.USERDATA = "userdata"
+Const.LUA_TYPE.FUNCTION = "function"
+Const.LUA_TYPE.THREAD = "thread"
+Const.LUA_TYPE.TABLE = "table"
 
 
 -- Entity ----------------------------------------------------------------------
 -- Collider
-Option.RELATIVE_ORIGIN_POINT = 0
-Option.RELATIVE_ACTION_POINT = 1
-Option.RECTANGLE = 0
-Option.CIRCLE = 1
+Const.COLLIDER_SHAPE.RECTANGLE = 0
+Const.COLLIDER_SHAPE.CIRCLE = 1
+Const.COLLIDER_POSITION.ORIGIN_POINT = 0
+Const.COLLIDER_POSITION.ACTION_POINT = 1
 
 
 -- Animation -------------------------------------------------------------------
-Option.ANIM_NORMAL = 0
-Option.ANIM_REVERSE = 1
-Option.ANIM_ALTERNATE = 2
-Option.ANIM_ALTERNATE_REVERSE = 3
+Const.ANIM_PLAYBACK.NORMAL = 0
+Const.ANIM_PLAYBACK.REVERSE = 1
+Const.ANIM_PLAYBACK.ALTERNATE = 2
+Const.ANIM_PLAYBACK.ALTERNATE_REVERSE = 3
 
 
 -- InputController -------------------------------------------------------------
-Option.INPUT_KB = 0
-Option.INPUT_JOY_BTN = 1
-Option.INPUT_JOY_AXIS = 2
-Option.INPUT_JOY_HAT = 3
+Const.INPUT_SOURCE.KB = 0
+Const.INPUT_SOURCE.JOY_BTN = 1
+Const.INPUT_SOURCE.JOY_AXIS = 2
+Const.INPUT_SOURCE.JOY_HAT = 3
