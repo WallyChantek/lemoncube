@@ -19,9 +19,10 @@ function Animation:new(image, width, height, options)
     o._offsetX = options.offsetX or 0
     o._offsetY = options.offsetY or 0
     o._actionPoints = options.actionPoints or {}
+    o._startingFrame = options.startingFrame or 1
     
     -- Internal values needed for animation processing
-    o._currentFrame = 1
+    o._currentFrame = o._startingFrame
     o._frameTimer = o._frameDuration
     o._remainingCycles = o._cycles
     o._paused = false
@@ -33,15 +34,15 @@ function Animation:new(image, width, height, options)
     if not o._isReversed then
         for y = 0, image:getHeight() - height, height do
             for x = 0, image:getWidth() - width, width do
-                table.insert(o._quads, love.graphics.newQuad(x, y, width, height,
-                    image:getDimensions()))
+                table.insert(o._quads, love.graphics.newQuad(x, y, width,
+                    height, image:getDimensions()))
             end
         end
     else
         for y = image:getHeight() - height, 0, -height do
             for x = image:getWidth() - width, 0, -width do
-                table.insert(o._quads, love.graphics.newQuad(x, y, width, height,
-                    image:getDimensions()))
+                table.insert(o._quads, love.graphics.newQuad(x, y, width,
+                    height, image:getDimensions()))
             end
         end
     end
@@ -71,11 +72,9 @@ end
 --[[
     Processes the animation.
 ]]--
-function Animation:animate()
-    -- Don't animate if playback paused or there are no frames left to animate
-    if self._paused or self._remainingCycles == 0 then
-        return
-    end
+function Animation:_animate()
+    -- Don't animate if playback's paused or there are no frames left to animate
+    if self._paused or self._remainingCycles == 0 then return end
     
     -- Animate
     if self._frameTimer <= 0 then
@@ -105,7 +104,7 @@ end
 --[[
     Displays the current frame of the animation.
 --]]
-function Animation:draw(x, y, rotation, scaleX, scaleY)
+function Animation:_draw(x, y, rotation, scaleX, scaleY)
     love.graphics.draw(self._img, self._quads[self._currentFrame],
         x, y, rotation,
         scaleX, scaleY, -self._offsetX, -self._offsetY)
@@ -114,22 +113,22 @@ end
 --[[
     Freezes an active animation.
 ]]--
-function Animation:pause()
+function Animation:_pause()
     self._paused = true
 end
 
 --[[
     Resumes a paused animation.
 ]]--
-function Animation:resume()
+function Animation:_resume()
     self._paused = false
 end
 
 --[[
     Restarts the animation from the beginning of its cycles.
 ]]--
-function Animation:restart()
-    self._currentFrame = 1
+function Animation:_restart()
+    self._currentFrame = self._startingFrame
     self._frameTimer = self._frameDuration
     self._remainingCycles = self._cycles
 end
@@ -137,7 +136,7 @@ end
 --[[
     Sets the frame duration of the animation.
 ]]--
-function Animation:setFrameDuration(frameDuration)
+function Animation:_setFrameDuration(frameDuration)
     self._frameTimer = self._frameTimer - (self._frameDuration - frameDuration)
     self._frameDuration = frameDuration
 end
@@ -145,29 +144,29 @@ end
 --[[
     Returns the current frame number of the animation.
 --]]
-function Animation:getCurrentFrame()
+function Animation:_getCurrentFrame()
     return self._currentFrame
 end
 
 --[[
     Returns whether the animation is paused or playing.
 ]]--
-function Animation:isPaused()
+function Animation:_isPaused()
     return self._paused
 end
 
 --[[
     Returns whether the animation is currently animating, or if it's reached the
-    end of its cycle. EXT: Looped animations will always return true.
+    end of its cycle. Looped animations will always return false.
 ]]--
-function Animation:isDone()
+function Animation:_isDone()
     return self._remainingCycles == 0
 end
 
 --[[
     Returns the X-coordinate position of the current frame's action point.
 ]]--
-function Animation:getActionPointX(actionPointName)
+function Animation:_getActionPointX(actionPointName)
     if type(self._actionPoints[actionPointName]) ~= Const.LUA_TYPE.NIL then
         return self._actionPoints[actionPointName][self._currentFrame].x
     else
@@ -178,7 +177,7 @@ end
 --[[
     Returns the Y-coordinate position of the current frame's action point.
 ]]--
-function Animation:getActionPointY(actionPointName)
+function Animation:_getActionPointY(actionPointName)
     if type(self._actionPoints[actionPointName]) ~= Const.LUA_TYPE.NIL then
         return self._actionPoints[actionPointName][self._currentFrame].y
     else

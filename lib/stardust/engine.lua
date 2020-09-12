@@ -4,6 +4,10 @@ Engine = {}
 Engine._scaleFactorX = 1
 Engine._scaleFactorY = 1
 
+-- Tile size for maps
+Engine._tileWidth = 16
+Engine._tileHeight = 16
+
 -- Input controller list for management
 Engine._inputControllers = {}
 
@@ -30,7 +34,7 @@ function Engine:update()
     -- Prepare FPS limiting
     self._fpsNextTime = self._fpsNextTime + self._fpsMinDt
 
-    -- Update controllers
+    -- Update input controllers
     for k, inputController in pairs(Engine._inputControllers) do
         inputController:_update()
     end
@@ -51,14 +55,18 @@ function Engine:draw()
 
     -- Draw debug overlay
     if Engine.debugConfig.showOverlay then
+        local fh = love.graphics.getFont():getHeight()
+        
         -- Display which gamestate is active
         love.graphics.setColor(1, 1, 1)
-        love.graphics.print("State: " .. Engine:getCurrentRoomName(), 4,
-            love.graphics.getHeight() - 16)
+        love.graphics.print("State: " .. Engine:getCurrentRoomName(), 4, 0)
+        love.graphics.print("Entities: " .. Engine._currentRoom:getEntityCount(),
+            4, fh)
         
         -- Display FPS
-        love.graphics.setColor(1, 0, 0)
-        love.graphics.print(tostring(love.timer.getFPS()), 4, 0)
+        love.graphics.setColor(1, 1, 0)
+        love.graphics.print(tostring(love.timer.getFPS()),
+            4, love.graphics.getHeight() - fh)
     end
 
     -- Cap FPS
@@ -98,9 +106,6 @@ function Engine:enableDebugMode(options)
         Engine.debugConfig.originCrosshairRadius
     Engine.debugConfig.highlightCollisions = options.highlightCollisions or
         Engine.debugConfig.highlightCollisions
-
-    -- Save debug option settings
-    Engine.debugConfig = options
 end
 
 --[[
@@ -109,6 +114,14 @@ end
 function Engine:setBaseResolution(resX, resY)
     Engine._scaleFactorX = love.graphics.getWidth() / resX
     Engine._scaleFactorY = love.graphics.getHeight() / resY
+end
+
+--[[
+    Changes the tile size of the game
+]]--
+function Engine:setTileSize(tileWidth, tileHeight)
+    Engine._tileWidth = tileWidth
+    Engine._tileHeight = tileHeight
 end
 
 --[[
@@ -123,10 +136,8 @@ end
 ]]--
 function Engine:changeRoom(room)
     -- Clean up the room we're about to leave
-    local prevRoom = nil
     if type(Engine._currentRoom) ~= Const.LUA_TYPE.NIL then
         Engine._currentRoom:_destroy()
-        prevRoom = Engine._currentRoom
     end
 
     -- Force garbage collection
@@ -135,7 +146,7 @@ function Engine:changeRoom(room)
     -- Switch to new room
     Engine._currentRoom = room
     if type(Engine._currentRoom.load) ~= Const.LUA_TYPE.NIL then
-        Engine._currentRoom:load(prevRoom)
+        Engine._currentRoom:load()
     end
 end
 
@@ -146,60 +157,74 @@ function Engine:getCurrentRoomName()
     return Engine._currentRoom:_getName()
 end
 
-function Engine:checkCollision(colliderA, colliderB)
-    collisionOccurred = false
-    
-    if colliderA.shape == Const.COLLIDER_SHAPE.RECTANGLE and colliderB.shape == Const.COLLIDER_SHAPE.RECTANGLE then
-        -- Both colliders are rectangles
-        if colliderA.x < colliderB.x + colliderB.width and
-            colliderA.x + colliderA.width > colliderB.x and
-            colliderA.y < colliderB.y + colliderB.height and
-            colliderA.y + colliderA.height > colliderB.y then
-            collisionOccurred = true
-        end
-    elseif colliderA.shape == Const.COLLIDER_SHAPE.CIRCLE and colliderB.shape == Const.COLLIDER_SHAPE.CIRCLE then
-        -- Both colliders are circles
-        local dX = colliderA.x - colliderB.x
-        local dY = colliderA.y - colliderB.y
-        collisionOccurred = (math.sqrt(dX * dX + dY * dY) <
-            (colliderA.radius + colliderB.radius))
+--[[
+    Returns whether two colliders are intersecting.
+]]--
+function Engine:checkCollision(colliderA, cb)
+    local colliders = {}
+    if cb.isCollider then
+        table.insert(colliders, cb)
     else
-        -- One collider is a rectangle and the other is a circle
-        if colliderA.shape == Const.COLLIDER_SHAPE.CIRCLE then
-            colliderA, colliderB = colliderB, colliderA
-        end
-        local rect = colliderA
-        local circle = colliderB
-        
-        local testX = circle.x
-        local testY = circle.y
-        
-        -- Find closest edge
-        if circle.x < rect.x then
-            testX = rect.x
-        elseif circle.x > rect.x + rect.width then
-            testX = rect.x + rect.width
-        end
-        if circle.y < rect.y then
-            testY = rect.y
-        elseif circle.y > rect.y + rect.height then
-            testY = rect.y + rect.height
-        end
-        
-        -- Calculate distances based on closest edges
-        local distX = circle.x - testX
-        local distY = circle.y - testY
-        local distance = math.sqrt((distX * distX) + (distY * distY))
-        
-        -- Collision check
-        collisionOccurred = (distance <= circle.radius)
+        colliders = cb
     end
     
-    if collisionOccurred then
-        colliderA.isColliding = true
-        colliderB.isColliding = true
+    local anyCollisionOccurred = false
+    
+    for i, colliderB in ipairs(colliders) do
+        local collisionOccurred = false
+        if colliderA.shape == Const.COLLIDER_SHAPE.RECTANGLE and colliderB.shape == Const.COLLIDER_SHAPE.RECTANGLE then
+            -- Both colliders are rectangles
+            if colliderA.x < colliderB.x + colliderB.width and
+                colliderA.x + colliderA.width > colliderB.x and
+                colliderA.y < colliderB.y + colliderB.height and
+                colliderA.y + colliderA.height > colliderB.y then
+                collisionOccurred = true
+            end
+        elseif colliderA.shape == Const.COLLIDER_SHAPE.CIRCLE and colliderB.shape == Const.COLLIDER_SHAPE.CIRCLE then
+            -- Both colliders are circles
+            local dX = colliderA.x - colliderB.x
+            local dY = colliderA.y - colliderB.y
+            collisionOccurred = (math.sqrt(dX * dX + dY * dY) <
+                (colliderA.radius + colliderB.radius))
+        else
+            -- One collider is a rectangle and the other is a circle
+            if colliderA.shape == Const.COLLIDER_SHAPE.CIRCLE then
+                colliderA, colliderB = colliderB, colliderA
+            end
+            local rect = colliderA
+            local circle = colliderB
+            
+            local testX = circle.x
+            local testY = circle.y
+            
+            -- Find closest edge
+            if circle.x < rect.x then
+                testX = rect.x
+            elseif circle.x > rect.x + rect.width then
+                testX = rect.x + rect.width
+            end
+            if circle.y < rect.y then
+                testY = rect.y
+            elseif circle.y > rect.y + rect.height then
+                testY = rect.y + rect.height
+            end
+            
+            -- Calculate distances based on closest edges
+            local distX = circle.x - testX
+            local distY = circle.y - testY
+            local distance = math.sqrt((distX * distX) + (distY * distY))
+            
+            -- Collision check
+            collisionOccurred = (distance <= circle.radius)
+        end
+        
+        if collisionOccurred then
+            colliderA.isColliding = true
+            colliderB.isColliding = true
+            anyCollisionOccurred = true
+        end
     end
     
     -- Return whether a collision happened
-    return collisionOccurred
+    return anyCollisionOccurred
 end

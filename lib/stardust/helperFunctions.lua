@@ -62,6 +62,31 @@ function util.numberToBoolean(n)
     return n > 0 and true or false
 end
 
+--[[
+    Returns a deep copy of a table.
+]]--
+function util.cloneTable(orig, copies)
+    copies = copies or {}
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        if copies[orig] then
+            copy = copies[orig]
+        else
+            copy = {}
+            copies[orig] = copy
+            for orig_key, orig_value in next, orig, nil do
+                copy[util.cloneTable(orig_key, copies)] =
+                    util.cloneTable(orig_value, copies)
+            end
+            setmetatable(copy, util.cloneTable(getmetatable(orig), copies))
+        end
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end
+
 
 -- Math Extensions -------------------------------------------------------------
 --[[

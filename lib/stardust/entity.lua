@@ -18,7 +18,7 @@ function Entity:new(x, y)
     -- Object's graphical/animation data
     o._colorMix = { r = 1, g = 1, b = 1, a = 1 }
     o._animations = {}
-    o._activeAnimation = ""
+    o._currentAnimation = ""
     o._angle = 0
     o._horizontalFlip = 1
     o._verticalFlip = 1
@@ -29,25 +29,30 @@ function Entity:new(x, y)
     return o
 end
 
+
+-- Graphics --------------------------------------------------------------------
+
 --[[
     Displays the entity's graphics.
 ]]--
 function Entity:_draw(originSize)
     -- Draw current graphic
     if self._isVisible and self._colorMix.a > 0 then
-        love.graphics.setColor(self._colorMix.r, self._colorMix.g, self._colorMix.b,
-            self._colorMix.a)
-        if type(self._animations[self._activeAnimation]) ~= Const.LUA_TYPE.NIL then
-            self._animations[self._activeAnimation]:draw(self._x, self._y,
+        love.graphics.setColor(self._colorMix.r, self._colorMix.g,
+            self._colorMix.b, self._colorMix.a)
+        if type(self._animations[self._currentAnimation]) ~= Const.LUA_TYPE.NIL
+        then
+            self._animations[self._currentAnimation]:_draw(self._x, self._y,
                 math.rad(self._angle), self._horizontalFlip * self._xScale,
                 self._verticalFlip * self._yScale)
         end
     end
     
-    -- Draw collider(s)
+    -- Draw collider(s) (for debugging)
     if (Engine.debugConfig.showColliders) then
         for k, collider in pairs(self._colliders) do
-            if Engine.debugConfig.highlightCollisions and collider.isColliding then
+            if Engine.debugConfig.highlightCollisions and collider.isColliding
+            then
                 love.graphics.setColor(0, 1, 0, 0.5)
             else
                 love.graphics.setColor(1, 0, 0, 0.5)
@@ -57,12 +62,13 @@ function Entity:_draw(originSize)
                 love.graphics.rectangle("fill", collider.x, collider.y,
                     collider.width, collider.height)
             else
-                love.graphics.circle("fill", collider.x, collider.y, collider.radius)
+                love.graphics.circle("fill", collider.x, collider.y,
+                    collider.radius)
             end
         end
     end
 
-    -- Draw origin point
+    -- Draw origin point (for debugging)
     if Engine.debugConfig.originCrosshairRadius > 0 then
         local orgOut = Engine.debugConfig.originCrosshairRadius +
             (Engine.debugConfig.originCrosshairRadius / 2)
@@ -79,24 +85,22 @@ function Entity:_draw(originSize)
     end
 end
 
-
--- Graphics --------------------------------------------------------------------
 --[[
-    Makes the entity visible.
+    Shows the entity's graphic.
 ]]--
 function Entity:show()
     self._isVisible = true
 end
 
 --[[
-    Makes the entity invisible.
+    Hides the entity's graphic.
 ]]--
 function Entity:hide()
     self._isVisible = false
 end
 
 --[[
-    Sets the color influence for the entity's graphics.
+    Sets the color influence for the entity's graphic.
 ]]--
 function Entity:setColorMix(r, g, b)
     self._colorMix.r = math.clamp(r, 0, 1)
@@ -105,7 +109,7 @@ function Entity:setColorMix(r, g, b)
 end
 
 --[[
-    Returns the color influence for the entity's graphics.
+    Returns the color influence for the entity's graphic.
 ]]--
 function Entity:getColorMix()
     return {
@@ -116,21 +120,21 @@ function Entity:getColorMix()
 end
 
 --[[
-    Sets the alpha/semi-transparency for the entity's graphics.
+    Sets the alpha/semi-transparency for the entity's graphic.
 ]]--
 function Entity:setTransparency(a)
     self._colorMix.a = math.clamp(a, 0, 1)
 end
 
 --[[
-    Returns the alpha/semi-transparency for the entity's graphics.
+    Returns the alpha/semi-transparency for the entity's graphic.
 ]]--
 function Entity:getTransparency()
     return self._colorMix.a
 end
 
 --[[
-    Flips the entity's graphics horizontally.
+    Flips the entity's graphic horizontally.
 ]]--
 function Entity:flipHorizontally(isFlipped)
     if type(isFlipped) == Const.LUA_TYPE.NIL then
@@ -145,7 +149,7 @@ function Entity:flipHorizontally(isFlipped)
 end
 
 --[[
-    Flips the entity's graphics vertically.
+    Flips the entity's graphic vertically.
 ]]--
 function Entity:flipVertically(isFlipped)
     if type(isFlipped) == Const.LUA_TYPE.NIL then
@@ -175,95 +179,101 @@ end
 
 
 -- Animation -------------------------------------------------------------------
+
 --[[
-    Processes the entity currently-active animation.
+    Processes the entity's currently animation.
 ]]--
 function Entity:_animate()
-    if type(self._animations[self._activeAnimation]) ~= Const.LUA_TYPE.NIL then
-        self._animations[self._activeAnimation]:animate()
+    if type(self._animations[self._currentAnimation]) ~= Const.LUA_TYPE.NIL then
+        self._animations[self._currentAnimation]:_animate()
     end
 end
 
 --[[
-    Adds an animation to the entity.
+    Adds a new animation to the entity.
 ]]--
 function Entity:addAnimation(animationName, image, width, height, options)
-    self._animations[animationName] = Animation:new(image, width, height, options)
+    self._animations[animationName] = Animation:new(
+        image, width, height, options)
     
-    if self._activeAnimation == "" then
-        self._activeAnimation = animationName
+    -- If this is the entity's first animation to be created, then display it
+    if self._currentAnimation == "" then
+        self._currentAnimation = animationName
     end
 end
 
 --[[
-    Changes the current animation.
+    Changes the currently animation.
 ]]--
 function Entity:changeAnimation(animationName)
-    self._activeAnimation = animationName
-    self._animations[self._activeAnimation]:restart()
-end
-
---[[
-    Pauses or resumes the current animation.
-]]--
-function Entity:pauseAnimation(isPaused)
-    isPaused = isPaused or not self._animations[self._activeAnimation]:isPaused()
-    
-    if isPaused then
-        self._animations[self._activeAnimation]:pause()
-    else
-        self._animations[self._activeAnimation]:resume()
+    if self._currentAnimation ~= animationName then
+        self._currentAnimation = animationName
+        self._animations[self._currentAnimation]:_restart()
     end
 end
 
 --[[
-    Restarts the current animation.
+    Pauses the currently animation.
+]]--
+function Entity:pauseAnimation()
+    self._animations[self._currentAnimation]:_pause()
+end
+
+--[[
+    Resumes the currently animation
+]]--
+function Entity:resumeAnimation()
+    self._animations[self._currentAnimation]:_resume()
+end
+
+--[[
+    Restarts the currently animation.
 ]]--
 function Entity:restartAnimation()
-    self._animations[self._activeAnimation]:restart()
+    self._animations[self._currentAnimation]:_restart()
 end
 
 --[[
     Sets the frame duration of the current animation.
 ]]--
 function Entity:setAnimationFrameDuration(newDuration)
-    self._animations[self._activeAnimation]:setFrameDuration(newDuration)
+    self._animations[self._currentAnimation]:_setFrameDuration(newDuration)
 end
 
 --[[
     Returns the current animation's name.
 ]]--
 function Entity:getAnimationName()
-    return self._activeAnimation
+    return self._currentAnimation
 end
 
 --[[
-    Returns the current frame number of the animation.
+    Returns the current frame number of the current animation.
 ]]--
 function Entity:getAnimationFrame()
-    return self._animations[self._activeAnimation]:getCurrentFrame()
+    return self._animations[self._currentAnimation]:_getCurrentFrame()
 end
 
 --[[
-    Returns whether the animation is paused or playing.
+    Returns whether the current animation is paused or playing.
 ]]--
 function Entity:isAnimationPaused()
-    return self._animations[self._activeAnimation]:isPaused()
+    return self._animations[self._currentAnimation]:_isPaused()
 end
 
 --[[
-    Returns whether the animation has reached the end of its cycle.
+    Returns whether the current animation has reached the end of its cycle.
 ]]--
 function Entity:isAnimationDone()
-    return self._animations[self._activeAnimation]:isDone()
+    return self._animations[self._currentAnimation]:_isDone()
 end
 
 --[[
-    Returns the X-coordinate position of one of the animation's action points.
+    Returns the X position of one of the current animation's action points.
 ]]--
 function Entity:getActionPointX(actionPointName)
-    if type(self._animations[self._activeAnimation]) ~= Const.LUA_TYPE.NIL then
-        return self._animations[self._activeAnimation]:getActionPointX(
+    if type(self._animations[self._currentAnimation]) ~= Const.LUA_TYPE.NIL then
+        return self._animations[self._currentAnimation]:_getActionPointX(
             actionPointName)
     else
         return 0
@@ -271,11 +281,11 @@ function Entity:getActionPointX(actionPointName)
 end
 
 --[[
-    Returns the Y-coordinate position of one of the animation's action points.
+    Returns the Y position of one of the current animation's action points.
 ]]--
 function Entity:getActionPointY(actionPointName)
-    if type(self._animations[self._activeAnimation]) ~= Const.LUA_TYPE.NIL then
-        return self._animations[self._activeAnimation]:getActionPointY(
+    if type(self._animations[self._currentAnimation]) ~= Const.LUA_TYPE.NIL then
+        return self._animations[self._currentAnimation]:_getActionPointY(
             actionPointName)
     else
         return 0
@@ -284,11 +294,11 @@ end
 
 
 -- Collisions ------------------------------------------------------------------
+
 --[[
     Adds a new collider to the entity.
 ]]--
 function Entity:addCollider(colliderName, options)
-    -- Check arguments
     options = options or {}
     
     -- Set option defaults
@@ -308,6 +318,7 @@ function Entity:addCollider(colliderName, options)
         Const.COLLIDER_POSITION.ORIGIN_POINT
     collider.relativeActionPoint = options.relativeActionPoint
     collider.isColliding = false
+    collider.isCollider = true
     
     -- Add to entity's list of colliders
     self._colliders[colliderName] = collider
@@ -364,8 +375,10 @@ function Entity:_updateColliders()
         local offsetX = collider.offsetX
         local offsetY = collider.offsetY
         if collider.relativity == Const.COLLIDER_POSITION.ACTION_POINT then
-            offsetX = offsetX + self:getActionPointX(collider.relativeActionPoint)
-            offsetY = offsetY + self:getActionPointY(collider.relativeActionPoint)
+            offsetX = offsetX + self:getActionPointX(
+                collider.relativeActionPoint)
+            offsetY = offsetY + self:getActionPointY(
+                collider.relativeActionPoint)
         end
         
         -- Reposition offset to rectangle's actual midpoint (gets undone later)
@@ -403,25 +416,12 @@ end
 
 
 -- Transformations -------------------------------------------------------------
---[[
-    Internal function for setting entity's X-axis position.
-]]--
-function Entity:_setX(x, updateColliders)
-    self._x = x
-end
-
---[[
-    Internal function for setting entity's Y-axis position.
-]]--
-function Entity:_setY(y, updateColliders)
-    self._y = y
-end
 
 --[[
     Sets the entity's X-axis position.
 ]]--
 function Entity:setX(x)
-    self:_setX(x)
+    self._x = x
     self:_updateColliders()
 end
 
@@ -429,7 +429,7 @@ end
     Sets the entity's Y-axis position.
 ]]--
 function Entity:setY(y)
-    self:_setY(y)
+    self._y = y
     self:_updateColliders()
 end
 
@@ -437,8 +437,8 @@ end
     Sets the entity's X & Y positions.
 ]]--
 function Entity:setPosition(x, y)
-    self:_setX(x)
-    self:_setY(y)
+    self._x = x
+    self._y = y
     self:_updateColliders()
 end
 
@@ -446,7 +446,7 @@ end
     Moves the entity's position horizontally by a specified amount.
 ]]--
 function Entity:moveX(pixels)
-    self:_setX(self._x + pixels)
+    self._x = self._x + pixels
     self:_updateColliders()
 end
 
@@ -454,7 +454,7 @@ end
     Moves the entity's position vertically by a specified amount.
 ]]--
 function Entity:moveY(pixels)
-    self:_setY(self._y + pixels)
+    self._y = self._y + pixels
     self:_updateColliders()
 end
 
@@ -462,8 +462,8 @@ end
     Moves the entity's position by a specified amount.
 ]]--
 function Entity:move(pixelsX, pixelsY)
-    self:_setX(self._x + pixels)
-    self:_setY(self._y + pixels)
+    self._x = self._x + pixelsX
+    self._y = self._y + pixelsY
     self:_updateColliders()
 end
 
@@ -482,7 +482,7 @@ function Entity:getY()
 end
 
 --[[
-    Sets the rotation degree for the entity's graphics.
+    Rotates the entity's graphic.
 ]]--
 function Entity:setAngle(degrees)
     self._angle = degrees % 360
@@ -490,7 +490,7 @@ function Entity:setAngle(degrees)
 end
 
 --[[
-    Rotates the entity's graphics by a specified amount.
+    Rotates the entity's graphic by a specified amount.
 ]]--
 function Entity:rotate(degrees)
     self._angle = (self._angle + degrees) % 360
@@ -498,31 +498,17 @@ function Entity:rotate(degrees)
 end
 
 --[[
-    Returns the current rotation degree for the entity's graphics.
+    Returns the current rotation degrees for the entity's graphics.
 ]]--
 function Entity:getAngle()
     return self._angle
 end
 
 --[[
-    Internal function for setting the horizontal scale for the entity's graphics.
-]]--
-function Entity:_setHorizontalScale(scale)
-    self._xScale = math.max(scale, 0)
-end
-
---[[
-    Internal function for setting the vertical scale for the entity's graphics.
-]]--
-function Entity:_setVerticalScale(scale)
-    self._yScale = math.max(scale, 0)
-end
-
---[[
     Sets the horizontal scale for the entity's graphics.
 ]]--
 function Entity:setHorizontalScale(scale)
-    self:_setHorizontalScale(scale)
+    self._xScale = scale
     self:_updateColliders()
 end
 
@@ -530,7 +516,7 @@ end
     Sets the vertical scale for the entity's graphics.
 ]]--
 function Entity:setVerticalScale(scale)
-    self:_setVerticalScale(scale)
+    self._yScale = scale
     self:_updateColliders()
 end
 
@@ -538,8 +524,8 @@ end
     Sets the scale for the entity's graphics.
 ]]--
 function Entity:setScale(scaleX, scaleY)
-    self:_setHorizontalScale(scaleX)
-    self:_setVerticalScale(scaleY)
+    self._xScale = scaleX
+    self._yScale = scaleY
     self:_updateColliders()
 end
 
@@ -547,7 +533,7 @@ end
     Scales the entity's graphics horizontally.
 ]]--
 function Entity:scaleHorizontally(scale)
-    self:_setHorizontalScale(self._xScale + scale)
+    self._xScale = self._xScale + scale
     self:_updateColliders()
 end
 
@@ -555,7 +541,7 @@ end
     Scales the entity's graphics vertically.
 ]]--
 function Entity:scaleVertically(scale)
-    self:_setVerticalScale(self._yScale + scale)
+    self._yScale = self._yScale + scale
     self:_updateColliders()
 end
 
@@ -563,8 +549,8 @@ end
     Scales the entity's graphics.
 ]]--
 function Entity:scale(scaleX, scaleY)
-    self:_setHorizontalScale(self._xScale + scaleX)
-    self:_setVerticalScale(self._yScale + scaleY)
+    self._xScale = self._xScale + scaleX
+    self._yScale = self._yScale + scaleY
     self:_updateColliders()
 end
 

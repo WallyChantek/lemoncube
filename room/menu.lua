@@ -4,7 +4,7 @@ function menu:load(prevRoom)
 end
 
 function menu:update()
-    if controllers[1]:wasPressed("fire1") then Engine:changeRoom(level) end
+    if gamepad:wasPressed("fire1") then Engine:changeRoom(level) end
 end
 
 function menu:draw()
