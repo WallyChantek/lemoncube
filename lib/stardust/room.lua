@@ -14,8 +14,7 @@ function Room:_init(roomName)
     self._roomName = roomName
     self._mapTiles = {}
     self._mapColliders = {}
-    self._mapObstacles = {}
-    self._mapPlatforms = {}
+    self._mapColliderObjects = {} -- This is just for quick retrieval
     self._entityCount = 0
 end
 
@@ -205,13 +204,9 @@ function Room:loadMap(map)
                             height = ((quadEnd.row - quadStart.row) *
                                 Engine._tileHeight) + Engine._tileHeight
                         })
-                        if tileType == 1 then
-                            table.insert(self._mapObstacles,
-                                c:getCollider("physbox"))
-                        elseif tileType == 2 then
-                            table.insert(self._mapPlatforms,
-                                c:getCollider("physbox"))
-                        end
+                        c:getCollider("physbox").tileType = tileType
+                        
+                        table.insert(self._mapColliderObjects, c:getCollider("physbox"))
                         table.insert(self._mapColliders, c)
                         
                         quadFound = false
@@ -232,8 +227,8 @@ end
 --[[
     Returns all the obstacle colliders for the loaded/calculated collision map.
 ]]--
-function Room:getMapObstacles()
-    return self._mapObstacles
+function Room:getMapColliders()
+    return self._mapColliderObjects
 end
 
 --[[

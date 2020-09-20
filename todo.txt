@@ -10,10 +10,6 @@
 [/] Fonts
   [/] Better-looking error handler screen
   [ ] Default bitmap font for framework
-[ ] Debugger
-  [ ] Add ability to add and monitor/watch data
-  - Clickteam-esque debugging system? Ability to add entity to inspector list,
-    remove, add automatically via code, etc.
 [/] Documentation
   [x] Get basic design/build system in place
   [ ] Index page
@@ -21,8 +17,7 @@
   - Check EXT: tags
 [/] Controller/joystick/input object
   [x] Base implementation
-  [ ] Handle joysticks properly
-  [ ] Functions for getting data from joystick axes/hats/etc.
+  [ ] Handle joysticks (just buttons & hats)
 [/] Various TODO's
 [/] Animation
   [x] Add animation functions
@@ -36,8 +31,6 @@
 
 
 -- Long-term Goals -------------------------------------------------------------
-- SAT (simple-axis theorem) collision, support for rotated rectangles and
-  circular colliders
 - Animation timeline application
   - Opens spritesheet, separates into frames based on specified width/height
     (basically like how quads are generated)
@@ -48,6 +41,7 @@
   - Saves data as JSON or whatever, LemonCube automatically searches in
     directory for JSON file when loading image data
   - When re-opening image, also automatically tried to load data if present
+- Map editor application (probably just make these in JavaScript)
 
 
 -- Temp Stuff ------------------------------------------------------------------

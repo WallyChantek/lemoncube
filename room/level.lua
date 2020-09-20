@@ -56,39 +56,46 @@ function level:update()
     
     -- Move player horizontally & check tilemap collisions
     self.player:moveX(self.player.xSpeed)
-    for i, o in ipairs(level:getMapObstacles()) do
+    for i, o in ipairs(level:getMapColliders()) do
         if Engine:checkCollision(playerPhysbox, o) then
             if self.player.xSpeed > 0 then
-                self.player:setX(o.x - (playerPhysbox.width/2))
+                -- Right side
+                if o.tileType ~= 2 then
+                    self.player:setX(o.x - (playerPhysbox.width/2))
+                    self.player.xSpeed = 0
+                end
             else
-                self.player:setX(o.x + o.width + (playerPhysbox.width/2))
+                -- Left side
+                if o.tileType ~= 2 then
+                    self.player:setX(o.x + o.width + (playerPhysbox.width/2))
+                    self.player.xSpeed = 0
+                end
             end
-            self.player.xSpeed = 0
         end
     end
     
     -- Move player vertically & check tilemap collisions
     self.player.ySpeed = self.player.ySpeed + self.player.GRAVITY
     self.player:moveY(self.player.ySpeed)
-    for i, o in ipairs(level:getMapObstacles()) do
+    for i, o in ipairs(level:getMapColliders()) do
         if Engine:checkCollision(playerPhysbox, o) then
             if self.player.ySpeed > 0 then
-                self.player:setY(o.y)
-                self.player.isGrounded = true
+                -- Floor
+                if o.tileType ~= 2 then
+                    self.player:setY(o.y)
+                    self.player.isGrounded = true
+                    self.player.ySpeed = 0
+                elseif (self.player:getY() - self.player.ySpeed - 1) < o.y then
+                    self.player:setY(o.y)
+                    self.player.isGrounded = true
+                    self.player.ySpeed = 0
+                end
             else
-                self.player:setY(o.y + o.height + playerPhysbox.height)
-            end
-            self.player.ySpeed = 0
-        end
-    end
-    
-    for i, o in ipairs(level:getMapPlatforms()) do
-        if Engine:checkCollision(playerPhysbox, o) then
-            if self.player.ySpeed > 0 and
-                (self.player:getY() - self.player.ySpeed - 1) < o.y then
-                self.player:setY(o.y)
-                self.player.isGrounded = true
-                self.player.ySpeed = 0
+                -- Ceiling
+                if o.tileType ~= 2 then
+                    self.player:setY(o.y + o.height + playerPhysbox.height)
+                    self.player.ySpeed = 0
+                end
             end
         end
     end
