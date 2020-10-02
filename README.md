@@ -8,3 +8,12 @@ LemonCube is a framework for the game engine LÖVE. Some of the features include
 - Tile-based map system which auto-generates collision maps based on which tiles have been marked as "obstacles"
 
 This framework is still heavily in development, and is honestly tailored to my own needs. Its focus is more on rapid prototyping and simple game development, and is not intended to be a robust solution for excessively-complex games.
+
+Planned features:
+- Bitmap fonts
+- Joystick support for Input Controllers
+- Camera system
+- Basic menu/UI system
+- External map editor
+- External animation editor
+- Full documentation
