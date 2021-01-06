@@ -1,7 +1,7 @@
 # LemonCube
 
 LemonCube is a framework for the game engine LÖVE.
-<p align="center"><img src="https://raw.githubusercontent.com/WallyChantek/lemoncube/main/images/mia-plat.gif" alt="LemonCube Preview"/></p>
+<p align="center"><img src="https://raw.githubusercontent.com/kevinmaddox/lemoncube/main/images/mia-plat.gif" alt="LemonCube Preview"/></p>
 
 Some of the features include:
 - Basic gamestate system with automatic room cleanup
