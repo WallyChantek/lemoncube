@@ -1,6 +1,9 @@
 # LemonCube
 
-LemonCube is a framework for the game engine LÖVE. Some of the features include:
+LemonCube is a framework for the game engine LÖVE.
+<p align="center"><img src="https://raw.githubusercontent.com/WallyChantek/lemoncube/main/images/mia-plat.gif" alt="LemonCube Preview"/></p>
+
+Some of the features include:
 - Basic gamestate system with automatic room cleanup
 - Entity system, which is effectively an easy way to create objects that contain animations and colliders, as well as a number of useful functions (along with an entity manager you don't have to touch)
 - Collision system (supports both rectangular and circular colliders)
