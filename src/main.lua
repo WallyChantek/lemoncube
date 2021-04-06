@@ -1,5 +1,5 @@
--- Stardust game framework
-require("lib.stardust.autoload")
+-- Lemoncube game framework
+require("lib.lemoncube.autoload")
 
 -- Game objects
 require("objects.player")
